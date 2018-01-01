@@ -95,5 +95,7 @@ sudo service smbd restart
 vim ~/.tmux.conf
 set-window-option -g mode-keys vi
 
+#mouse mode
+set -g mouse on
 ```
 
