@@ -2,7 +2,7 @@
 
 #
 
-# vim 
+# vim git zsh 
 enable_modules=()
 
 if [ $# -gt 0 ]; then
@@ -73,15 +73,10 @@ function init_git() {
     execute "git config --global core.editor \"vim\""
 }
 
-function init_curl() {
-    install_command "curl" "curl"
-}
-
 function init_zsh() {
     # install git
     if install_command "zsh" "zsh"; then
-        #return
-        echo ""
+        return
     fi
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
     execute "sed -i -e \"s/^ZSH_THEME=.*$/ZSH_THEME=\\\"ys\\\"/\" $HOME/.zshrc"
