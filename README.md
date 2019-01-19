@@ -65,7 +65,7 @@ source ~/.oh-my-zsh/plugins/incr/incr*.zsh
 
 ```
 
-#samba (file shared with windows)
+# samba (file shared with windows)
 ```
 #install samba
 sudo apt install samba
