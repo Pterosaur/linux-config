@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+config_url="https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf"
 
 execute() {
     # args
@@ -71,14 +71,9 @@ init_vim() {
     install_command "vim" "vim"
 
     # configure vimrc
-    vimrc="
-set tabstop=4
-set shiftwidth=4
-set expandtab
-set nu
-    "
+    vimrc="$(curl -fsSL $config_url/vimrc)"
     config_file="$HOME/.vimrc"
-    write_config "$config_file" "$vimrc"
+    write_config "$config_file" "$vimrc" 1
 
 } 
 
@@ -107,18 +102,8 @@ init_samba() {
 
     # configure samba 
     config="/etc/samba/smb.conf"
-    user=$(whoami)
     passwd="000000"
-    smbconf="
-[share_$user]
-path=$HOME
-available=yes
-valid user=$user
-read only=no
-browsable=yes
-public=yes
-writable=yes
-    "
+    smbconf="$(curl -fsSL $config_url/smb.conf)"
     write_config "$config" "$smbconf"
     execute "echo \"$passwd\n$passwd\" | smbpasswd -a $user -s"
     execute "service smbd restart" 1
@@ -131,40 +116,8 @@ init_tmux() {
     
     # configure tmux
     config="$HOME/.tmux.conf"
-    tmuxconf="
-    set-window-option -g mode-keys vi
-    #mouse mode
-    set -g mouse on
-
-    set -g prefix C-z
-    set -g base-index 1
-    set -g mouse on
-    set -g pane-base-index 1
-    set -g renumber-windows on
-    set-window-option -g mode-keys vi
-
-    # hjkl pane traversal
-    bind h select-pane -L
-    bind j select-pane -D
-    bind k select-pane -U
-    bind l select-pane -R
-
-    # List of plugins
-    set -g @plugin 'tmux-plugins/tpm'
-    set -g @plugin 'tmux-plugins/tmux-sensible'
-
-    # Other examples:
-    # set -g @plugin 'github_username/plugin_name'
-    # set -g @plugin 'git@github.com/user/plugin'
-    # set -g @plugin 'git@bitbucket.com/user/plugin'
-
-    set -g @plugin 'tmux-plugins/tmux-resurrect'
-    set -g @plugin 'tmux-plugins/tmux-yank'
-
-    # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
-    run '~/.tmux/plugins/tpm/tpm'
-    "
-    write_config "$config" "$tmuxconf"
+    tmuxconf="$(curl -fsSL $config_url/tmux.conf)"
+    write_config "$config" "$tmuxconf" 1
 }
 
 
