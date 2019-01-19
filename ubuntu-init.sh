@@ -3,6 +3,9 @@
 
 
 execute() {
+    # args
+    # 1: command
+    # 2: run as root > 0, else as current user
     prefix=""
     if [[ $2 && $2 -gt 0 && ( $(whoami) != "root" ) ]]; then
         prefix="sudo"
@@ -17,6 +20,8 @@ execute() {
 }
 
 is_command_existed() {
+    # args
+    # 1: command name
     if command -v $1 > /dev/null 2>&1; then
         return 1
     else
@@ -25,6 +30,9 @@ is_command_existed() {
 }
 
 install_command() {
+    # args
+    # 1: command name
+    # 2: package name
     if is_command_existed $1; then
         execute " apt install -y $2" 1
         if [ $? -ne 0 ];then
@@ -36,18 +44,29 @@ install_command() {
 }
 
 write_config() {
+    # args
+    # 1: config name
+    # 2: content
+    # 3: overrite > 0, else append
     file=$1
     content=$2
+    action=">>"
     if [ ! -e $file ]; then
         touch $file
     fi
     if [ ! -w $file ]; then
         exit 1
     fi
-    execute "echo \"$content\" >> $file"
+
+    if [[ $3 && $3 -gt 0 ]]; then
+        action=">"
+    fi
+    
+    execute "echo \"$content\" $action $file"
 }
 
 init_vim() {
+
     # install vim
     install_command "vim" "vim"
 
@@ -147,6 +166,8 @@ init_tmux() {
     "
     write_config "$config" "$tmuxconf"
 }
+
+
 
 main() {
 
