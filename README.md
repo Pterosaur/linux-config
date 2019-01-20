@@ -1,5 +1,11 @@
 # linux-config
 
+Automatically Install
+```
+# ubuntu init
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Pterosaur/linux-config/master/ubuntu-init.sh)"
+```
+
 ## vim
 ```
 sudo apt install vim
