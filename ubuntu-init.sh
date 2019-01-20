@@ -1,12 +1,12 @@
 #!/bin/bash
 
-config_url="https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf"
+config_url="https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf/"
 
 execute() {
     # args
     # 1: command
     # 2: run as root > 0, else as current user
-    prefix=""
+    local prefix=""
     if [[ $2 && $2 -gt 0 && ( $(whoami) != "root" ) ]]; then
         prefix="sudo"
     fi
@@ -48,9 +48,9 @@ write_config() {
     # 1: config name
     # 2: content
     # 3: overrite > 0, else append
-    file=$1
-    content=$2
-    action=">>"
+    local file=$1
+    local content=$2
+    local action=">>"
     if [ ! -e $file ]; then
         touch $file
     fi
@@ -71,8 +71,8 @@ init_vim() {
     install_command "vim" "vim"
 
     # configure vimrc
-    vimrc="$(curl -fsSL $config_url/vimrc)"
-    config_file="$HOME/.vimrc"
+    local vimrc="$(curl -fsSL ${config_url}vimrc)"
+    local config_file="$HOME/.vimrc"
     write_config "$config_file" "$vimrc" 1
 
 } 
@@ -101,12 +101,23 @@ init_samba() {
     install_command "smbclient" "smbclient"
 
     # configure samba 
-    config="/etc/samba/smb.conf"
-    passwd="000000"
-    smbconf="$(curl -fsSL $config_url/smb.conf)"
-    write_config "$config" "$smbconf"
-    execute "echo \"$passwd\n$passwd\" | smbpasswd -a $user -s"
-    execute "service smbd restart" 1
+    local config="/etc/samba/smb.conf"
+    local passwd="000000"
+    local smbconf="$(curl -fsSL ${config_url}smb.conf)"
+    smbconf=$(sh -c "echo \"${smbconf}\"")
+
+    local key="${smbconf//[[:blank:]]/}"
+    key=(${key//\n/})
+    local original_conf=$(sed -e "s/\(\\s\)//g" ${config})
+    original_conf=(${original_conf//\n/})
+
+    # insert config if no item
+    if [[ "${original_conf[*]}" != *" ${key} "* ]]; then
+        write_config "$config" "$smbconf"
+        execute "echo \"$passwd\n$passwd\" | smbpasswd -a $user -s"
+        execute "service smbd restart" 1
+    fi
+
 
 }
 
@@ -115,8 +126,8 @@ init_tmux() {
     install_command "tmux" "tmux"
     
     # configure tmux
-    config="$HOME/.tmux.conf"
-    tmuxconf="$(curl -fsSL $config_url/tmux.conf)"
+    local config="$HOME/.tmux.conf"
+    local tmuxconf="$(curl -fsSL ${config_url}tmux.conf)"
     write_config "$config" "$tmuxconf" 1
 }
 
@@ -125,7 +136,7 @@ init_tmux() {
 main() {
 
     # vim git zsh samba tmux
-    install_modules=(vim git zsh samba tmux)
+    local install_modules=(vim git zsh samba tmux)
 
     if [ $# -gt 0 ]; then
         install_modules=($@)
@@ -137,7 +148,8 @@ main() {
     do
         eval "init_"$module
     done
-
 }
 
 main ${@}
+
+
