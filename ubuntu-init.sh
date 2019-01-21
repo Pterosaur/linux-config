@@ -31,6 +31,11 @@ install_command() {
     # 1: command name
     # 2: package name
     if ! is_command_existed "apt-fast"; then
+        execute "
+sudo add-apt-repository main
+sudo add-apt-repository universe
+sudo add-apt-repository restricted
+sudo add-apt-repository multiverse"
         execute "sudo apt-get update"
         execute "printf \"6\n70\n\" | sudo apt-get install -y expect"
         execute "sudo apt-get install -y software-properties-common"
