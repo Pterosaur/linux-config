@@ -131,6 +131,7 @@ init_tmux() {
     local config="$HOME/.tmux.conf"
     local tmuxconf="$(curl -fsSL ${config_url}tmux.conf)"
     write_config "$config" "$tmuxconf" 1
+
 }
 
 init_ripgrep() {
@@ -145,12 +146,20 @@ init_ripgrep() {
 
 init_dev() {
 
+    execute "sudo apt-fast install build-essential python-dev python3-dev"
+
     execute "sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list"
     execute "sudo apt-fast update"
 
-    install_command "gcc" "build-essential"
+    local root="$HOME/root"
+    local src="$root/src"
+    local bin="$bin/bin"
 
+    # install vim compiled by self
     execute "sudo apt-fast build-dep -y vim"
+    execute "git clone "
+    
+
 
 }
 
