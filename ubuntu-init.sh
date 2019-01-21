@@ -7,10 +7,15 @@ config_url="https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf
 execute() {
     # args
     # 1: command
-    
-    echo -e '\E[32;40m'" $1"
+    # 2: run as root > 0, else as current user
+    local prefix=""
+    if [[ $2 && $2 -gt 0 ]]; then
+        prefix="sudo"
+    fi    
+
+    echo -e '\E[32;40m'" ${prefix} sh -c \"$1\""
     tput sgr0
-    sh -c " $1"
+    ${prefix} sh -c " $1"
     if [ $? -ne 0 ];then
         exit 1
     fi
@@ -31,20 +36,19 @@ install_command() {
     # 1: command name
     # 2: package name
     if ! is_command_existed "apt-fast"; then
-        execute "
-sudo add-apt-repository main
-sudo add-apt-repository universe
-sudo add-apt-repository restricted
-sudo add-apt-repository multiverse"
-        execute "sudo apt-get update"
+        execute "add-apt-repository main" 1
+        execute "add-apt-repository universe" 1
+        execute "add-apt-repository restricted" 1
+        execute "add-apt-repository multiverse" 1
+        execute "apt-get update" 1
         execute "printf \"6\n70\n\" | sudo apt-get install -y expect"
-        execute "sudo apt-get install -y software-properties-common"
-        execute "sudo add-apt-repository -y ppa:apt-fast/stable"
-        execute "sudo apt-get update"
+        execute "apt-get install -y software-properties-common" 1
+        execute "add-apt-repository -y ppa:apt-fast/stable" 1
+        execute "apt-get update" 1
         execute "printf \"1\n$(grep -c ^processor /proc/cpuinfo)\nyes\n\" | sudo apt-get -y install apt-fast "
     fi
     if ! is_command_existed $1; then
-        execute "sudo apt-fast install -y $2"
+        execute "apt-fast install -y $2" 1
         if [ $? -ne 0 ];then
             exit 1
         fi
@@ -64,15 +68,12 @@ write_config() {
     if [ ! -e $file ]; then
         touch $file
     fi
-    if [ ! -w $file ]; then
-        exit 1
-    fi
 
     if [[ $3 && $3 -gt 0 ]]; then
         action=">"
     fi
     
-    execute "echo \"$content\" $action $file"
+    execute "echo \"$content\" $action $file" 1
 }
 
 init_vim() {
@@ -111,6 +112,7 @@ init_samba() {
 
     # configure samba 
     local config="/etc/samba/smb.conf"
+    local user=$(whoami)
     local passwd="000000"
     local smbconf="$(curl -fsSL ${config_url}smb.conf)"
     smbconf=$(sh -c "echo \"${smbconf}\"")
@@ -124,7 +126,7 @@ init_samba() {
     if [[ "${original_conf[*]}" != *" ${key} "* ]]; then
         write_config "$config" "$smbconf"
         execute "echo \"$passwd\n$passwd\" | sudo smbpasswd -a $user -s"
-        execute "sudo service smbd restart"
+        execute "service smbd restart" 1
     fi
 
 
@@ -145,7 +147,7 @@ init_tools() {
 
     if ! is_command_existed "rg"; then
         execute "curl -LO https://github.com/BurntSushi/ripgrep/releases/download/0.10.0/ripgrep_0.10.0_amd64.deb"
-        execute "sudo dpkg -i ripgrep_0.10.0_amd64.deb"
+        execute "dpkg -i ripgrep_0.10.0_amd64.deb" 1
         execute "rm ripgrep_0.10.0_amd64.deb"
     fi
 
@@ -176,11 +178,13 @@ init_dev() {
         "python3-dev"
         "cmake"
     )
-    execute "sudo apt-fast install -y ${dev_packages[*]}"
+    execute "apt-fast install -y ${dev_packages[*]}" 1
 
     # install vim YouCompleteMe
     execute "git clone https://github.com/Valloric/YouCompleteMe.git"
+    execute "cd YouCompleteMe && git submodule update --init --recursive"
     execute "cd YouCompleteMe && python3 install.py --clang-completer"
+    execute "rm -rf YouCompleteMe"
     
 }
 
@@ -193,15 +197,15 @@ expect \"Default display manager: \"
 send \"sddm\n\"
 expect eof
 EOF"
-    execute "sudo reboot"
+    execute "reboot" 1
 }
 
 init_xrdp() {
-    execute "sudo apt install -y xrdp"      
-    execute "sudo sed -e 's/^new_cursors=true/new_cursors=false/g' \
-           -i /etc/xrdp/xrdp.ini"
-    execute "sudo systemctl enable xrdp"
-    execute "sudo systemctl restart xrdp"
+    execute "apt install -y xrdp" 1
+    execute "sed -e 's/^new_cursors=true/new_cursors=false/g' \
+           -i /etc/xrdp/xrdp.ini" 1
+    execute "systemctl enable xrdp" 1
+    execute "systemctl restart xrdp" 1
     
     execute "echo \"startkde\" > ~/.xsession"
     execute "cat <<EOF > ~/.xsessionrc
@@ -227,13 +231,14 @@ ResultAny=yes
 ResultInactive=auth_admin
 ResultActive=yes
 EOF"
-    execute "sudo systemctl restart polkit"   
+    execute "systemctl restart polkit" 1
 }
 
 main() {
 
-    # vim git zsh samba tmux tools dev
-    local install_modules=(vim git zsh samba tmux tools dev)
+    # automatical : vim git zsh samba tmux tools
+    # manuual : dev kde xrdp
+    local install_modules=(vim git zsh samba tmux tools)
 
     if [ $# -gt 0 ]; then
         install_modules=($@)
