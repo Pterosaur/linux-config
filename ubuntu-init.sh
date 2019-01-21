@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Test on Ubuntu 18.04
+
 config_url="https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf/"
 
 execute() {
@@ -134,7 +136,7 @@ init_tmux() {
 
 }
 
-init_ripgrep() {
+init_tools() {
 
     if ! is_command_existed "rg"; then
         execute "curl -LO https://github.com/BurntSushi/ripgrep/releases/download/0.10.0/ripgrep_0.10.0_amd64.deb"
@@ -142,30 +144,45 @@ init_ripgrep() {
         execute "rm ripgrep_0.10.0_amd64.deb"
     fi
 
+    install_command "htop" "htop"
+
+    install_command "tree" "tree"
+
 }
 
 init_dev() {
+
+    #execute "sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list"
+    #execute "sudo apt-fast update"
+
+    #local root="$HOME/root"
+    #local src="$root/src"
+    #local bin="$bin/bin"
+    #execute "mkdir -p ${root}"
+    #execute "mkdir -p ${src}"
+    #execute "mkdir -p ${bin}"
     
-    execute "sudo apt-fast install -y build-essential python-dev python3-dev"
+    # install develop tools
+    dev_packages=(
+        "build-essential" 
+        "python-dev" 
+        "python3-dev"
+        "cmake"
+    )
+    execute "sudo apt-fast install -y ${dev_packages[*]}"
 
-    execute "sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list"
-    execute "sudo apt-fast update"
-
-    local root="$HOME/root"
-    local src="$root/src"
-    local bin="$bin/bin"
-
-    # install vim compiled by self
-    execute "sudo apt-fast build-dep -y vim"
+    # install vim YouCompleteMe
+    execute "git clone https://github.com/Valloric/YouCompleteMe.git"
+    execute "cd YouCompleteMe && python3 install.py --clang-completer"
     
-
+    
 
 }
 
 main() {
 
-    # vim git zsh samba tmux ripgrep dev
-    local install_modules=(vim git zsh samba tmux ripgrep dev)
+    # vim git zsh samba tmux tools dev
+    local install_modules=(vim git zsh samba tmux tools dev)
 
     if [ $# -gt 0 ]; then
         install_modules=($@)
