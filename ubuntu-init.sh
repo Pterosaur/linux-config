@@ -36,13 +36,13 @@ install_command() {
     # 1: command name
     # 2: package name
     if ! is_command_existed "apt-fast"; then
+        execute "apt-get update" 1
+        execute "printf \"6\n70\n\" | sudo apt-get install -y expect"
+        execute "apt-get install -y software-properties-common" 1
         execute "add-apt-repository main" 1
         execute "add-apt-repository universe" 1
         execute "add-apt-repository restricted" 1
         execute "add-apt-repository multiverse" 1
-        execute "apt-get update" 1
-        execute "printf \"6\n70\n\" | sudo apt-get install -y expect"
-        execute "apt-get install -y software-properties-common" 1
         execute "add-apt-repository -y ppa:apt-fast/stable" 1
         execute "apt-get update" 1
         execute "printf \"1\n$(grep -c ^processor /proc/cpuinfo)\nyes\n\" | sudo apt-get -y install apt-fast "
