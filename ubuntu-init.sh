@@ -148,6 +148,8 @@ init_tools() {
 
     install_command "tree" "tree"
 
+    install_command "telnet" "telnet"
+
 }
 
 init_dev() {
@@ -175,8 +177,52 @@ init_dev() {
     execute "git clone https://github.com/Valloric/YouCompleteMe.git"
     execute "cd YouCompleteMe && python3 install.py --clang-completer"
     
-    
+}
 
+init_kde() {
+    install_command "expect"
+    execute "cat <<EOF | expect
+set timeout -1
+spawn sudo apt install -y kubuntu-desktop
+expect \"Default display manager: \"
+send \"sddm\n\"
+expect eof
+EOF"
+    execute "sudo reboot"
+}
+
+init_xrdp() {
+    execute "sudo apt install -y xrdp"      
+    execute "sudo sed -e 's/^new_cursors=true/new_cursors=false/g' \
+           -i /etc/xrdp/xrdp.ini"
+    execute "sudo systemctl enable xrdp"
+    execute "sudo systemctl restart xrdp"
+    
+    execute "echo \"startkde\" > ~/.xsession"
+    execute "cat <<EOF > ~/.xsessionrc
+export XDG_SESSION_DESKTOP=KDE
+export XDG_DATA_DIRS=/usr/share/plasma:/usr/local/share:/usr/share:/var/lib/snapd/desktop
+export XDG_CONFIG_DIRS=/etc/xdg/xdg-plasma:/etc/xdg:/usr/share/kubuntu-default-settings/kf5-settings
+EOF"
+    execute "cat <<EOF | \
+  sudo tee /etc/polkit-1/localauthority/50-local.d/xrdp-NetworkManager.pkla
+[Netowrkmanager]
+Identity=unix-group:sudo
+Action=org.freedesktop.NetworkManager.network-control
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes
+EOF"
+    execute "cat <<EOF | \
+  sudo tee /etc/polkit-1/localauthority/50-local.d/xrdp-packagekit.pkla
+[Netowrkmanager]
+Identity=unix-group:sudo
+Action=org.freedesktop.packagekit.system-sources-refresh
+ResultAny=yes
+ResultInactive=auth_admin
+ResultActive=yes
+EOF"
+    execute "sudo systemctl restart polkit"   
 }
 
 main() {
