@@ -192,11 +192,11 @@ init_kde() {
     install_command "expect"
     execute "cat <<EOF | expect
 set timeout -1
-spawn sudo apt install -y kubuntu-desktop
+spawn apt install -y kubuntu-desktop
 expect \"Default display manager: \"
 send \"sddm\n\"
 expect eof
-EOF"
+EOF" 1
     execute "reboot" 1
 }
 
