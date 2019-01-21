@@ -89,9 +89,9 @@ init_git() {
 
 init_zsh() {
     # install git
-    #if install_command "zsh" "zsh"; then
-    #    return
-    #fi
+    if install_command "zsh" "zsh"; then
+        return
+    fi
     execute 'print "exit\n" | sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
     execute "sed -i -E \"s/^ZSH_THEME=.*$/ZSH_THEME=\\\"ys\\\"/\" $HOME/.zshrc"
     execute "sed -i -E \"s/^plugins=\(/plugins=\( extract z sudo /\" $HOME/.zshrc"
@@ -145,8 +145,8 @@ init_ripgrep() {
 }
 
 init_dev() {
-
-    execute "sudo apt-fast install build-essential python-dev python3-dev"
+    
+    execute "sudo apt-fast install -y build-essential python-dev python3-dev"
 
     execute "sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list"
     execute "sudo apt-fast update"
@@ -157,7 +157,6 @@ init_dev() {
 
     # install vim compiled by self
     execute "sudo apt-fast build-dep -y vim"
-    execute "git clone "
     
 
 
