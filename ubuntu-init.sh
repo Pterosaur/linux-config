@@ -21,7 +21,7 @@ execute() {
     fi
 }
 
-is_command_existed() {
+is_command() {
     # args
     # 1: command name
     if command -v $1 > /dev/null 2>&1; then
@@ -35,7 +35,7 @@ install_command() {
     # args
     # 1: command name
     # 2: package name
-    if ! is_command_existed "apt-fast"; then
+    if ! is_command "apt-fast"; then
         execute "apt-get update" 1
         execute "printf \"6\n70\n\" | sudo apt-get install -y expect"
         execute "apt-get install -y software-properties-common" 1
@@ -47,7 +47,7 @@ install_command() {
         execute "apt-get update" 1
         execute "printf \"1\n$(grep -c ^processor /proc/cpuinfo)\nyes\n\" | sudo apt-get -y install apt-fast "
     fi
-    if ! is_command_existed $1; then
+    if ! is_command $1; then
         execute "apt-fast install -y $2" 1
         if [ $? -ne 0 ];then
             exit 1
@@ -144,7 +144,7 @@ init_tmux() {
 
 init_tools() {
 
-    if ! is_command_existed "rg"; then
+    if ! is_command "rg"; then
         execute "curl -LO https://github.com/BurntSushi/ripgrep/releases/download/0.10.0/ripgrep_0.10.0_amd64.deb"
         execute "dpkg -i ripgrep_0.10.0_amd64.deb" 1
         execute "rm ripgrep_0.10.0_amd64.deb"
@@ -186,9 +186,11 @@ init_dev() {
     execute "rm -rf YouCompleteMe"
     
     #install docker
-    execute 'curl -fsSL get.docker.com -o get-docker.sh'
-    execute 'sudo sh get-docker.sh'
-    execute 'rm get-docker.sh'
+    if ! is_command "docker"; then
+        execute 'curl -fsSL get.docker.com -o get-docker.sh'
+        execute 'sudo sh get-docker.sh'
+        execute 'rm get-docker.sh'
+    fi
 
 }
 
