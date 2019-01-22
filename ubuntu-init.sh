@@ -176,6 +176,9 @@ init_dev() {
         "python-dev" 
         "python3-dev"
         "cmake"
+        "libtool"
+        "m4"
+        "automake"
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
 
@@ -183,7 +186,7 @@ init_dev() {
     execute "git clone https://github.com/Valloric/YouCompleteMe.git"
     execute "cd YouCompleteMe && git submodule update --init --recursive"
     execute "cd YouCompleteMe && python3 install.py --clang-completer"
-    execute "rm -rf YouCompleteMe"
+    # execute "rm -rf YouCompleteMe"
     
     #install docker
     if ! is_command "docker"; then
