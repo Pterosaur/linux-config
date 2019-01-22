@@ -13,9 +13,9 @@ execute() {
         prefix="sudo"
     fi    
 
-    echo -e '\E[32;40m'" ${prefix} sh -c \"$1\""
+    echo -e '\E[32;40m'" ${prefix} bash -c \"$1\""
     tput sgr0
-    ${prefix} sh -c " $1"
+    ${prefix} bash -c " $1"
     if [ $? -ne 0 ];then
         exit 1
     fi
@@ -129,7 +129,6 @@ init_samba() {
         execute "service smbd restart" 1
     fi
 
-
 }
 
 init_tmux() {
@@ -186,6 +185,11 @@ init_dev() {
     execute "cd YouCompleteMe && python3 install.py --clang-completer"
     execute "rm -rf YouCompleteMe"
     
+    #install docker
+    execute 'curl -fsSL get.docker.com -o get-docker.sh'
+    execute 'sudo sh get-docker.sh'
+    execute 'rm get-docker.sh'
+
 }
 
 init_kde() {
