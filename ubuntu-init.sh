@@ -158,6 +158,8 @@ init_tools() {
 
     install_command "telnet" "telnet"
 
+    install_command "wget" "wget"
+
 }
 
 init_dev() {
@@ -193,14 +195,19 @@ init_dev() {
     fi
 
     #install ConqueGDB
-    wget https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf/conque_gdb.vmb
-    vim conque_gdb.vmb -c "so %" -c "q"
-    rm conque_gdb.vmb
+    if [ $(find $HOME/.vim -name 'conque_gdb.vim' | wc -l) -eq 0 ]; then
+        execute "wget ${config_url}conque_gdb.vmb"
+        execute "vim conque_gdb.vmb -c \"so %\" -c \"q\""
+        execute "rm conque_gdb.vmb"
+    fi
 
     # install vim YouCompleteMe
-    execute "git clone https://github.com/Valloric/YouCompleteMe.git"
-    execute "cd YouCompleteMe && git submodule update --init --recursive"
-    execute "cd YouCompleteMe && python3 install.py --clang-completer"
+    
+    if [ $(find $HOME/.vim -name 'YouCompleteMe' | wc -l) -eq 0 ]; then
+        execute "git clone https://github.com/Valloric/YouCompleteMe.git"
+        execute "cd YouCompleteMe && git submodule update --init --recursive"
+        execute "cd YouCompleteMe && python3 install.py --clang-completer"
+    fi
     # execute "rm -rf YouCompleteMe"
 }
 
