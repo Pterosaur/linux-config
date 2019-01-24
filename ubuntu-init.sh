@@ -181,14 +181,9 @@ init_dev() {
         "libtool"
         "m4"
         "automake"
+        "gdb"
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
-
-    # install vim YouCompleteMe
-    execute "git clone https://github.com/Valloric/YouCompleteMe.git"
-    execute "cd YouCompleteMe && git submodule update --init --recursive"
-    execute "cd YouCompleteMe && python3 install.py --clang-completer"
-    # execute "rm -rf YouCompleteMe"
     
     #install docker
     if ! is_command "docker"; then
@@ -197,6 +192,16 @@ init_dev() {
         execute 'rm get-docker.sh'
     fi
 
+    #install ConqueGDB
+    wget https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf/conque_gdb.vmb
+    vim conque_gdb.vmb -c "so %" -c "q"
+    rm conque_gdb.vmb
+
+    # install vim YouCompleteMe
+    execute "git clone https://github.com/Valloric/YouCompleteMe.git"
+    execute "cd YouCompleteMe && git submodule update --init --recursive"
+    execute "cd YouCompleteMe && python3 install.py --clang-completer"
+    # execute "rm -rf YouCompleteMe"
 }
 
 init_kde() {
@@ -208,7 +213,6 @@ expect \"Default display manager: \"
 send \"sddm\n\"
 expect eof
 EOF" 1
-    execute "reboot" 1
 }
 
 init_xrdp() {
