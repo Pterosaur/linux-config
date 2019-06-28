@@ -6,12 +6,13 @@ set -o pipefail
 # Test on Ubuntu 18.04
 
 config_url="https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf/"
+init_conf_flag="Zegan conf init"
 
 execute() {
     # args
     # 1: command
     # 2: run as root > 0, else as current user
-    local prefix=" "
+    local prefix=""
     if [[ $# -gt 1 && $2 -gt 0 ]]; then
         prefix="sudo"
     fi    
@@ -58,7 +59,7 @@ write_config() {
     # args
     # 1: config name
     # 2: content
-    # 3: overrite > 0, else append
+    # 3: overrite == 1 overwirte, else append
     local file=$1
     local content=$2
     local action=">>"
@@ -66,11 +67,15 @@ write_config() {
         touch $file
     fi
 
-    if [[ $# -gt 2 && $3 -gt 0 ]]; then
+    if [[ $# -gt 2 && $3 -eq 1 ]]; then
         action=">"
     fi
+    local need_sudo=0
+    if [[ $# -gt 3 && $4 -eq 1 ]]; then
+        need_sudo=1
+    fi
     
-    execute "echo \"$content\" $action $file" 1
+    execute "echo \"$content\n\" $action $file" "${need_sudo}"
 }
 
 init_vim() {
@@ -79,10 +84,14 @@ init_vim() {
     install_command "vim" "vim"
 
     # configure vimrc
-    local vimrc="$(curl -fsSL ${config_url}vimrc)"
-    local config_file="$HOME/.vimrc"
-    write_config "$config_file" "$vimrc" 1
+    local vimrc="${HOME}/.vimrc"
+    local content="$(curl -fsSL ${config_url}vimrc)"
 
+    if [[ -e ${vimrc} && $(cat ${vimrc}) == *"${init_conf_flag}"* ]]; then
+        return
+    fi
+    write_config "${vimrc}" "\\\" ${init_conf_flag}"
+    write_config "${vimrc}" "${content}"
 } 
 
 init_git() {
@@ -94,15 +103,20 @@ init_git() {
 
 init_zsh() {
     # install git
-    if is_command "zsh"; then
+    install_command "zsh" "zsh"
+
+    if [[ ! -e ".oh-my-zsh" ]]; then
+        execute 'print "exit\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
+    fi
+
+    zshrc="${HOME}/.zshrc"
+    if [[ -e ${zshrc} && $(cat ${zshrc}) == *"${init_conf_flag}"* ]]; then
         return
     fi
-    install_command "zsh" "zsh"
-    zshrc="$HOME/.zshrc"
-    execute 'print "exit\n" | sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
-    execute "sed -i -E \"s/^ZSH_THEME=.*$/ZSH_THEME=\\\"ys\\\"/\" $zshrc"
-    execute "sed -i -E \"s/^plugins=\(/plugins=\( extract z sudo /\" $zshrc"
-    write_config "$zshrc" "setopt nosharehistory"
+    write_config "${zshrc}" "# ${init_conf_flag}"
+    execute "sed -i -E \"s/^ZSH_THEME=.*$/ZSH_THEME=\\\"ys\\\"/\" ${zshrc}"
+    execute "sed -i -E \"s/^plugins=\(/plugins=\( extract z sudo /\" ${zshrc}"
+    write_config "${zshrc}" "setopt nosharehistory"
 }
 
 init_samba() {
@@ -111,23 +125,18 @@ init_samba() {
     install_command "smbclient" "smbclient"
 
     # configure samba 
-    local config="/etc/samba/smb.conf"
+    local smbconf="/etc/samba/smb.conf"
     local user=$(whoami)
     local passwd="000000"
-    local smbconf="$(curl -fsSL ${config_url}smb.conf)"
-    smbconf=$(sh -c "echo \"${smbconf}\"")
+    local content="$(curl -fsSL ${config_url}smb.conf)"
 
-    local key="${smbconf//[[:blank:]]/}"
-    key=(${key//\n/})
-    local original_conf=$(sed -E "s/\(\\s\)//g" ${config})
-    original_conf=(${original_conf//\n/})
-
-    # insert config if no item
-    if [[ "${original_conf[*]}" != *" ${key} "* ]]; then
-        write_config "$config" "$smbconf"
-        execute "echo \"$passwd\n$passwd\" | sudo smbpasswd -a $user -s"
-        execute "service smbd restart" 1
+    if [[ $(cat ${smbconf}) == *"${init_conf_flag}"* ]]; then
+        return
     fi
+    write_config "${smbconf}" "# ${init_conf_flag}"
+    write_config "${smbconf}" "${content}" 0 1
+    execute "echo \"${passwd}\n${passwd}\" | sudo smbpasswd -a ${user} -s"
+    execute "service smbd restart" 1
 
 }
 
@@ -136,10 +145,14 @@ init_tmux() {
     install_command "tmux" "tmux"
     
     # configure tmux
-    local config="$HOME/.tmux.conf"
-    local tmuxconf="$(curl -fsSL ${config_url}tmux.conf)"
-    write_config "$config" "$tmuxconf" 1
-
+    local tmuxconf="$HOME/.tmux.conf"
+    local content="$(curl -fsSL ${config_url}tmux.conf)"
+    
+    if [[ $(cat ${tmuxconf}) == *"${init_conf_flag}"* ]]; then
+        return
+    fi
+    write_config "${tmuxconf}" "# ${init_conf_flag}"
+    write_config "${tmuxconf}" "${content}"
 }
 
 init_tools() {
@@ -194,7 +207,7 @@ init_dev() {
     execute "apt-fast install -y ${dev_packages[*]}" 1
     
     #install ConqueGDB
-    if [ $(find $HOME/.vim -name 'conque_gdb.vim' | wc -l) -eq 0 ]; then
+    if [[ $(find ${HOME}/.vim -name 'conque_gdb.vim' | wc -l) -eq 0 ]]; then
         execute "wget ${config_url}conque_gdb.vmb"
         execute "vim conque_gdb.vmb -c \"so %\" -c \"q\""
         execute "rm conque_gdb.vmb"
