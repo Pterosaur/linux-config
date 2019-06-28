@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -x -e -u
+set -o pipefail
+
 # Test on Ubuntu 18.04
 
 config_url="https://raw.githubusercontent.com/Pterosaur/linux-config/master/conf/"
@@ -8,17 +11,16 @@ execute() {
     # args
     # 1: command
     # 2: run as root > 0, else as current user
-    local prefix=""
-    if [[ $2 && $2 -gt 0 ]]; then
+    local prefix=" "
+    if [[ $# -gt 1 && $2 -gt 0 ]]; then
         prefix="sudo"
     fi    
 
-    echo -e '\E[32;40m'" ${prefix} bash -c \"$1\""
-    tput sgr0
-    ${prefix} bash -c " $1"
-    if [ $? -ne 0 ];then
-        exit 1
+    if [[ $- == *i* ]];then
+        tput sgr0
     fi
+
+    ${prefix} bash -c " $1"
 }
 
 is_command() {
@@ -47,14 +49,9 @@ install_command() {
         execute "apt-get update" 1
         execute "printf \"1\n$(grep -c ^processor /proc/cpuinfo)\nyes\n\" | sudo apt-get -y install apt-fast "
     fi
-    if ! is_command $1; then
-        execute "apt-fast install -y $2" 1
-        if [ $? -ne 0 ];then
-            exit 1
-        fi
-        return 1
+    if ! is_command ${1}; then
+        execute "apt-fast install -y ${@:2}" 1
     fi
-    return 0
 }
 
 write_config() {
@@ -69,7 +66,7 @@ write_config() {
         touch $file
     fi
 
-    if [[ $3 && $3 -gt 0 ]]; then
+    if [[ $# -gt 2 && $3 -gt 0 ]]; then
         action=">"
     fi
     
@@ -97,9 +94,10 @@ init_git() {
 
 init_zsh() {
     # install git
-    if install_command "zsh" "zsh"; then
+    if is_command "zsh"; then
         return
     fi
+    install_command "zsh" "zsh"
     zshrc="$HOME/.zshrc"
     execute 'print "exit\n" | sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
     execute "sed -i -E \"s/^ZSH_THEME=.*$/ZSH_THEME=\\\"ys\\\"/\" $zshrc"
@@ -160,6 +158,14 @@ init_tools() {
 
     install_command "wget" "wget"
 
+    install_command "ip" "iproute iproute-doc" 
+}
+
+init_docker() {
+    #install docker
+    if ! is_command "docker"; then
+        execute 'sh -c "$(curl -fsSL get.docker.com)"'
+    fi
 }
 
 init_dev() {
@@ -187,13 +193,6 @@ init_dev() {
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
     
-    #install docker
-    if ! is_command "docker"; then
-        execute 'curl -fsSL get.docker.com -o get-docker.sh'
-        execute 'sudo sh get-docker.sh'
-        execute 'rm get-docker.sh'
-    fi
-
     #install ConqueGDB
     if [ $(find $HOME/.vim -name 'conque_gdb.vim' | wc -l) -eq 0 ]; then
         execute "wget ${config_url}conque_gdb.vmb"
@@ -209,6 +208,19 @@ init_dev() {
         execute "cd YouCompleteMe && python3 install.py --clang-completer"
     fi
     # execute "rm -rf YouCompleteMe"
+}
+
+init_man() {
+    man_packets=(
+        "manpages" 
+        "manpages-dev" 
+        "freebsd-manpages"
+        "man2html"
+        "manpages-posix"
+        "manpages-posix-dev"
+    )
+
+    execute " apt-fast install -y " 1
 }
 
 init_kde() {
@@ -260,7 +272,7 @@ main() {
 
     # automatical : vim git zsh samba tmux tools
     # manuual : dev kde xrdp
-    local install_modules=(vim git zsh tmux tools)
+    local install_modules=(man vim git zsh tmux tools)
 
     if [ $# -gt 0 ]; then
         install_modules=($@)
