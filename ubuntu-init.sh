@@ -171,7 +171,7 @@ init_tools() {
 
     install_command "wget" "wget"
 
-    install_command "ip" "iproute iproute-doc" 
+    install_command "ip" "net-tools" 
 }
 
 init_docker() {
@@ -285,7 +285,7 @@ main() {
 
     # automatical : vim git zsh samba tmux tools
     # manuual : dev kde xrdp
-    local install_modules=(man vim git zsh tmux tools)
+    local install_modules=(vim git zsh tmux tools man)
 
     if [ $# -gt 0 ]; then
         install_modules=($@)
