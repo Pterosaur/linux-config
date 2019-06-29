@@ -75,8 +75,8 @@ write_config() {
         need_sudo=1
     fi
     
-    execute "echo \"${content}\" ${action} ${file}" "${need_sudo}"
-    execute "echo \"\" >> ${file}" "${need_sudo}"
+    execute "printf \"${content}\" ${action} ${file}" "${need_sudo}"
+    execute "printf \"\" >> ${file}" "${need_sudo}"
 }
 
 init_vim() {
@@ -107,7 +107,7 @@ init_zsh() {
     install_command "zsh" "zsh"
 
     if [[ ! -e ".oh-my-zsh" ]]; then
-        execute 'print "exit\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
+        execute 'print "Y\nexit\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
     fi
 
     zshrc="${HOME}/.zshrc"
@@ -136,7 +136,7 @@ init_samba() {
     fi
     write_config "${smbconf}" "# ${init_conf_flag}"
     write_config "${smbconf}" "${content}" 0 1
-    execute "echo \"${passwd}\n${passwd}\" | sudo smbpasswd -a ${user} -s"
+    execute "printf \"${passwd}\n${passwd}\" | sudo smbpasswd -a ${user} -s"
     execute "service smbd restart" 1
 
 }
