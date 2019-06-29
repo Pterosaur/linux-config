@@ -13,6 +13,6 @@ RUN \
 
 # Install environment
 RUN \
-   wget https://raw.githubusercontent.com/Pterosaur/linux-config/master/ubuntu-init.sh -o .init.sh
+   wget https://raw.githubusercontent.com/Pterosaur/linux-config/master/ubuntu-init.sh -O .init.sh
 RUN \
    bash .init.sh
