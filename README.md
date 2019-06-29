@@ -1,14 +1,17 @@
 # linux-config
 
 Automatically Install
-```
+``` bash
 # Install docker image
-sh -c "$(curl -fsSL get.docker.com) && docker build -t zegan https://raw.githubusercontent.com/Pterosaur/linux-config/master/Dockerfile
+sh -c "$(curl -fsSL get.docker.com)
+docker build -t zegan https://raw.githubusercontent.com/Pterosaur/linux-config/master/Dockerfile
 ```
-```
+``` bash
 # ubuntu init
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Pterosaur/linux-config/master/ubuntu-init.sh)"
 ```
+
+## Detail
 
 ## vim
 ```
