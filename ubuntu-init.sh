@@ -107,8 +107,9 @@ init_zsh() {
     install_command "zsh" "zsh"
 
     if [[ ! -e ".oh-my-zsh" ]]; then
-        execute 'print "Y\nexit\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
+        execute 'print "exit\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
     fi
+    execute "chsh -s `which zsh`"
 
     zshrc="${HOME}/.zshrc"
     if [[ -e ${zshrc} && $(cat ${zshrc}) == *"${init_conf_flag}"* ]]; then
