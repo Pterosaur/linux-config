@@ -75,7 +75,8 @@ write_config() {
         need_sudo=1
     fi
     
-    execute "echo \"$content\n\" $action $file" "${need_sudo}"
+    execute "echo \"${content}\" ${action} ${file}" "${need_sudo}"
+    execute "echo \"\" >> ${file}" "${need_sudo}"
 }
 
 init_vim() {
