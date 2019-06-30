@@ -16,3 +16,6 @@ RUN \
    wget https://raw.githubusercontent.com/Pterosaur/linux-config/master/ubuntu-init.sh -O .init.sh
 RUN \
    bash .init.sh
+
+CMD \
+   zsh
