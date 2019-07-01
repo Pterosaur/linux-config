@@ -217,9 +217,15 @@ init_dev() {
 
     #install vim plugin
     if ! is_command "vim-addon-manager"; then
+        local vimrc="${HOME}/.vimrc"
+
         execute "apt-fast install -y vim-addon-manager"
+
+        local ycm="$(curl -fsSL ${config_url}ycm.conf)"
         execute "apt-fast install -y vim-youcompleteme"
         execute "vim-addon-manager install youcompleteme"
+        write_config "${vimrc}" "${ycm}" 
+
     fi
 }
 
