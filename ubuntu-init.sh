@@ -76,7 +76,7 @@ write_config() {
         need_sudo=1
     fi
 
-    execute "printf \"${content}\n | base64 -d \" ${action} ${file}" "${need_sudo}"
+    execute "printf \"${content}\n\" | base64 -d ${action} ${file}" "${need_sudo}"
     execute "printf \"\n\" >> ${file}" "${need_sudo}"
 }
 
