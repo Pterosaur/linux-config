@@ -289,7 +289,7 @@ init_dev() {
     fi
 
     if [[ $( find ${vimdir} -name 'minibufexpl.vim' | wc -l ) -eq 0 ]];then
-        execute "wget https://raw.githubusercontent.com/fholgado/minibufexpl.vim/master/plugin/minibufexpl.vim -O ${vimdir}/minibufexpl.vim "
+        execute "wget https://raw.githubusercontent.com/fholgado/minibufexpl.vim/master/plugin/minibufexpl.vim -O ${vimdir}/plugin/minibufexpl.vim "
     fi
 }
 
