@@ -60,8 +60,9 @@ write_config() {
     # 1: config name
     # 2: content
     # 3: overrite == 1 overwirte, else append
+    install_command "base64" "base64"
     local file=$1
-    local content=$2
+    local content=$(${2} | base64)
     local action=">>"
     if [ ! -e $file ]; then
         touch $file
@@ -74,8 +75,8 @@ write_config() {
     if [[ $# -gt 3 && $4 -eq 1 ]]; then
         need_sudo=1
     fi
-    
-    execute "printf \"${content}\n\" ${action} ${file}" "${need_sudo}"
+
+    execute "printf \"${content}\n | base64 -d \" ${action} ${file}" "${need_sudo}"
     execute "printf \"\n\" >> ${file}" "${need_sudo}"
 }
 
