@@ -62,7 +62,7 @@ write_config() {
     # 3: overrite == 1 overwirte, else append
     install_command "base64" "base64"
     local file=$1
-    local content=$(${2} | base64)
+    local content=$( base64 <<< "${2}" )
     local action=">>"
     if [ ! -e $file ]; then
         touch $file
