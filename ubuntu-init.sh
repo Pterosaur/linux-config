@@ -199,6 +199,7 @@ init_tools() {
     install_command "wget" "wget"
 
     install_command "ip" "net-tools" 
+
 }
 
 init_docker() {
@@ -257,15 +258,15 @@ init_dev() {
         write_config "${vimrc}" "${ycm}" 
     fi
 
-    if [[ $( find ${vimdir} -name 'pathogen*' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'pathogen.vim' | wc -l ) -eq 0 ]];then
         # pathogen
-        execute "mkdir -p ~/.vim/autoload ~/.vim/bundle && curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
+        execute "mkdir -p ${vimdir}autoload ${vimdir}/bundle && curl -LSso ${vimdir}/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
         write_config "${vimrc}" "execute pathogen#infect()" 
     fi
 
     if [[ $( find ${vimdir} -name 'nerdtree*' | wc -l ) -eq 0 ]];then
         # NerdTree
-        execute "git clone https://github.com/scrooloose/nerdtree.git ~/.vim/bundle/nerdtree"
+        execute "git clone https://github.com/scrooloose/nerdtree.git ${vimdir}/bundle/nerdtree"
         local nt="$(curl -fsSL ${config_url}vimrc.nerdtree)"
         write_config "${vimrc}" "${nt}"
     fi
@@ -275,16 +276,19 @@ init_dev() {
         execute "vim-addon-manager install taglist"
     fi
 
-    if [[ $( find ${vimdir} -name 'winmanager*' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'winmanager.vim' | wc -l ) -eq 0 ]];then
         # WinManager
         execute "vim-addon-manager install winmanager"
-        local wm_vim="${HOME}/.vim/plugin/winmanager.vim"
+        local wm_vim="${vimdir}/plugin/winmanager.vim"
         local wm="$(curl -fsSL ${config_url}winmanager.vim)"
         write_config "${wm_vim}" "${wm}"
         local wm="$(curl -fsSL ${config_url}vimrc.winmanager)"
         write_config "${vimrc}" "${wm}"
     fi
 
+    if [[ $( find ${vimdir} -name 'minibufexpl.vim' | wc -l ) -eq 0 ]];then
+        execute "wget https://raw.githubusercontent.com/fholgado/minibufexpl.vim/master/plugin/minibufexpl.vim -O ${vimdir}/minibufexpl.vim "
+    fi
 }
 
 init_man() {
