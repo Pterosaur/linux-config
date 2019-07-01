@@ -239,7 +239,7 @@ init_dev() {
 
         # NerdTree
         execute "git clone https://github.com/scrooloose/nerdtree.git ~/.vim/bundle/nerdtree"
-        local nt="$(curl -fsSL ${config_url}winmanager.vim)"
+        local nt="$(curl -fsSL ${config_url}vimrc.nerdtree)"
         write_config "${vimrc}" "${nt}"
 
         # WinManager
@@ -255,6 +255,7 @@ init_dev() {
 
 init_man() {
     man_packets=(
+        "man"
         "manpages" 
         "manpages-dev" 
         "freebsd-manpages"
