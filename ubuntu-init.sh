@@ -121,7 +121,7 @@ init_zsh() {
     # install git
     install_command "zsh" "zsh"
 
-    if [[ ! -e ".oh-my-zsh" ]]; then
+    if [[ ! -e "${HOME}/.oh-my-zsh" ]]; then
         execute 'print "exit\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
     fi
     execute "chsh -s `which zsh`"
