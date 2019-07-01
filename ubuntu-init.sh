@@ -204,9 +204,9 @@ init_dev() {
         "libtool"
         "m4"
         "automake"
-        "gdb",
-        "vim-scripts",
-        "vim-doc",
+        "gdb"
+        "vim-scripts"
+        "vim-doc"
         "ctags"
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
