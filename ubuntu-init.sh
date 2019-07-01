@@ -75,8 +75,8 @@ write_config() {
         need_sudo=1
     fi
     
-    execute "printf \"${content}\" ${action} ${file}" "${need_sudo}"
-    execute "printf \"\" >> ${file}" "${need_sudo}"
+    execute "printf \"${content}\n\" ${action} ${file}" "${need_sudo}"
+    execute "printf \"\n\" >> ${file}" "${need_sudo}"
 }
 
 init_vim() {
@@ -217,9 +217,9 @@ init_dev() {
 
     #install vim plugin
     if ! is_command "vim-addon-manager"; then
-        install_modules "vim-addon-manager"
-        install_modules "vim-youcompleteme"
-        execute "vim-addon-manager youcompleteme"
+        execute "apt-fast install -y vim-addon-manager"
+        execute "apt-fast install -y vim-youcompleteme"
+        execute "vim-addon-manager install youcompleteme"
     fi
 }
 
