@@ -1,4 +1,5 @@
 set encoding=UTF-8
+
 set tabstop=4
 set shiftwidth=4
 set expandtab
@@ -6,4 +7,6 @@ set nu
 
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 
+set autoindent
+set cindent
 
