@@ -59,7 +59,8 @@ write_config() {
     # args
     # 1: config name
     # 2: content
-    # 3: overrite == 1 overwirte, else append
+    # 3: action == 1 overwirte, else append
+    # 4: need_sudo == 1 sudo, else no
     install_command "base64" "base64"
     local file=$1
     local content=$( base64 <<< "${2}" )
@@ -281,7 +282,7 @@ init_dev() {
         execute "vim-addon-manager install winmanager"
         local wm_vim="${vimdir}/plugin/winmanager.vim"
         local wm="$(curl -fsSL ${config_url}winmanager.vim)"
-        write_config "${wm_vim}" "${wm}"
+        write_config "${wm_vim}" "${wm}" 0 1
         local wm="$(curl -fsSL ${config_url}vimrc.winmanager)"
         write_config "${vimrc}" "${wm}"
     fi
