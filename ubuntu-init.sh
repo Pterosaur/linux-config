@@ -96,6 +96,9 @@ init_vim() {
     write_config "${vimrc}" "${content}"
 
     #install vim plugin
+
+    install_command "vim-addon-manager" "vim-addon-manager"
+
     local vimdir="${HOME}/.vim"
     local vimrc="${HOME}/.vimrc"
 
@@ -241,8 +244,6 @@ init_dev() {
         "vim-scripts"
         "vim-doc"
         "ctags"
-        "vim-addon-manager"
-
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
     
