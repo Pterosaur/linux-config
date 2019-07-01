@@ -169,18 +169,19 @@ init_tmux() {
     local content="$(curl -fsSL ${config_url}tmux.conf)"
     
     if [[ $(cat ${tmuxconf}) != *"${init_conf_flag}"* ]]; then
-        return
+        write_config "${tmuxconf}" "# ${init_conf_flag}"
+        write_config "${tmuxconf}" "${content}"
+        write_config "${tmuxconf}" "# ${init_conf_flag}"
     fi
-    write_config "${tmuxconf}" "# ${init_conf_flag}"
-    write_config "${tmuxconf}" "${content}"
-    write_config "${tmuxconf}" "# ${init_conf_flag}"
+    
     local bash_alias="$HOME/.bash_alias"
-    write_config "${bash_alias}" "alias tmux='tmux -2'"
-    write_config "${bash_alias}" "alias tn='tmux -2 new-session'"
-    write_config "${bash_alias}" "alias tnw='tmux -2 new-window'"
-    write_config "${bash_alias}" "alias tl='tmux -2 list-session'"
-    write_config "${bash_alias}" "alias ta='tmux -2 attach'"
-
+    if [[ $(cat ${bash_alias}) != *tmux* ]];then
+        write_config "${bash_alias}" "alias tmux='tmux -2'"
+        write_config "${bash_alias}" "alias tn='tmux -2 new-session'"
+        write_config "${bash_alias}" "alias tnw='tmux -2 new-window'"
+        write_config "${bash_alias}" "alias tl='tmux -2 list-session'"
+        write_config "${bash_alias}" "alias ta='tmux -2 attach'"
+    fi
 }
 
 init_tools() {
