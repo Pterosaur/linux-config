@@ -95,6 +95,19 @@ init_vim() {
     write_config "${vimrc}" "\" ${init_conf_flag}"
     write_config "${vimrc}" "${content}"
 
+    if [[ $( find ${vimdir} -name 'pathogen*' | wc -l ) -eq 0 ]];then
+        # pathogen
+        execute "mkdir -p ~/.vim/autoload ~/.vim/bundle && curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
+        write_config "${vimrc}" "execute pathogen#infect()" 
+    fi
+
+    # Change theme
+    execute "git clone https://github.com/morhetz/gruvbox.git ~/.vim/bundle/gruvbox"
+    write_config  "${vimrc}" "set t_Co=256"
+    write_config  "${vimrc}" "colorscheme gruvbox"
+    write_config  "${vimrc}" "set background=dark"
+
+    write_config "${vimrc}" "\" ${init_conf_flag}"
 } 
 
 init_git() {
@@ -113,14 +126,16 @@ init_zsh() {
     fi
     execute "chsh -s `which zsh`"
 
-    zshrc="${HOME}/.zshrc"
+    local zshrc="${HOME}/.zshrc"
     if [[ -e ${zshrc} && $(cat ${zshrc}) == *"${init_conf_flag}"* ]]; then
         return
     fi
     write_config "${zshrc}" "# ${init_conf_flag}"
     execute "sed -i -E \"s/^ZSH_THEME=.*$/ZSH_THEME=\\\"ys\\\"/\" ${zshrc}"
     execute "sed -i -E \"s/^plugins=\(/plugins=\( extract z sudo /\" ${zshrc}"
-    write_config "${zshrc}" "setopt nosharehistory"
+    local content=$(curl -fsSL ${config_url}zshrc)
+    write_config "${zshrc}" "${content}"
+
 }
 
 init_samba() {
@@ -152,11 +167,19 @@ init_tmux() {
     local tmuxconf="$HOME/.tmux.conf"
     local content="$(curl -fsSL ${config_url}tmux.conf)"
     
-    if [[ $(cat ${tmuxconf}) == *"${init_conf_flag}"* ]]; then
+    if [[ $(cat ${tmuxconf}) != *"${init_conf_flag}"* ]]; then
         return
     fi
     write_config "${tmuxconf}" "# ${init_conf_flag}"
     write_config "${tmuxconf}" "${content}"
+    write_config "${tmuxconf}" "# ${init_conf_flag}"
+    local bash_alias="$HOME/.bash_alias"
+    write_config "${bash_alias}" "alias tmux='tmux -2'"
+    write_config "${bash_alias}" "alias tn='tmux -2 new-session'"
+    write_config "${bash_alias}" "alias tnw='tmux -2 new-window'"
+    write_config "${bash_alias}" "alias tl='tmux -2 list-session'"
+    write_config "${bash_alias}" "alias ta='tmux -2 attach'"
+
 }
 
 init_tools() {
