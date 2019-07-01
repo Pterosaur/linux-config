@@ -204,7 +204,10 @@ init_dev() {
         "libtool"
         "m4"
         "automake"
-        "gdb"
+        "gdb",
+        "vim-scripts",
+        "vim-doc",
+        "ctags"
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
     
@@ -221,11 +224,32 @@ init_dev() {
 
         execute "apt-fast install -y vim-addon-manager"
 
-        local ycm="$(curl -fsSL ${config_url}ycm.conf)"
+        # YouCompleteMe
         execute "apt-fast install -y vim-youcompleteme"
         execute "vim-addon-manager install youcompleteme"
+        local ycm="$(curl -fsSL ${config_url}vimrc.youcompleteme)"
         write_config "${vimrc}" "${ycm}" 
 
+        # tag list
+        execute "vim-addon-manager install taglist"
+
+        # pathogen
+        execute "mkdir -p ~/.vim/autoload ~/.vim/bundle && curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
+        write_config "execute pathogen#infect()" "${vimrc}"
+
+        # NerdTree
+        execute "git clone https://github.com/scrooloose/nerdtree.git ~/.vim/bundle/nerdtree"
+        local nt="$(curl -fsSL ${config_url}winmanager.vim)"
+        write_config "${vimrc}" "${nt}"
+
+        # WinManager
+        execute "vim-addon-manager install winmanager"
+        local wm_vim="${HOME}/.vim/plugin/winmanager.vim"
+        local wm="$(curl -fsSL ${config_url}winmanager.vim)"
+        write_config "${wm_vim}" "${wm}"
+        local wm="$(curl -fsSL ${config_url}vimrc.winmanager)"
+        write_config "${vimrc}" "${wm}"
+        
     fi
 }
 
