@@ -92,7 +92,7 @@ init_vim() {
     if [[ -e ${vimrc} && $(cat ${vimrc}) == *"${init_conf_flag}"* ]]; then
         return
     fi
-    write_config "${vimrc}" "\\\" ${init_conf_flag}"
+    write_config "${vimrc}" "\" ${init_conf_flag}"
     write_config "${vimrc}" "${content}"
 } 
 
@@ -209,40 +209,49 @@ init_dev() {
         "vim-scripts"
         "vim-doc"
         "ctags"
+        "vim-addon-manager"
+
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
     
+    #install vim plugin
+    local vimdir="${HOME}/.vim"
+    local vimrc="${HOME}/.vimrc"
+
     #install ConqueGDB
-    if [[ $(find ${HOME}/.vim -name 'conque_gdb.vim' | wc -l) -eq 0 ]]; then
+    if [[ $(find ${vimdir} -name 'conque_gdb.vim' | wc -l) -eq 0 ]]; then
         execute "wget ${config_url}conque_gdb.vmb"
         execute "vim conque_gdb.vmb -c \"so %\" -c \"q\""
         execute "rm conque_gdb.vmb"
     fi
 
-    #install vim plugin
-    if ! is_command "vim-addon-manager"; then
-        local vimrc="${HOME}/.vimrc"
-
-        execute "apt-fast install -y vim-addon-manager"
-
+    if [[ $( find ${vimdir} -name 'youcompleteme*' | wc -l ) -eq 0 ]];then
         # YouCompleteMe
         execute "apt-fast install -y vim-youcompleteme"
         execute "vim-addon-manager install youcompleteme"
         local ycm="$(curl -fsSL ${config_url}vimrc.youcompleteme)"
         write_config "${vimrc}" "${ycm}" 
+    fi
 
+    if [[ $( find ${vimdir} -name 'taglist*' | wc -l ) -eq 0 ]];then
         # tag list
         execute "vim-addon-manager install taglist"
+    fi
 
+    if [[ $( find ${vimdir} -name 'pathogen*' | wc -l ) -eq 0 ]];then
         # pathogen
         execute "mkdir -p ~/.vim/autoload ~/.vim/bundle && curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
         write_config "${vimrc}" "execute pathogen#infect()" 
+    fi
 
+    if [[ $( find ${vimdir} -name 'nerdtree*' | wc -l ) -eq 0 ]];then
         # NerdTree
         execute "git clone https://github.com/scrooloose/nerdtree.git ~/.vim/bundle/nerdtree"
         local nt="$(curl -fsSL ${config_url}vimrc.nerdtree)"
         write_config "${vimrc}" "${nt}"
+    fi
 
+    if [[ $( find ${vimdir} -name 'winmanager*' | wc -l ) -eq 0 ]];then
         # WinManager
         execute "vim-addon-manager install winmanager"
         local wm_vim="${HOME}/.vim/plugin/winmanager.vim"
@@ -250,8 +259,8 @@ init_dev() {
         write_config "${wm_vim}" "${wm}"
         local wm="$(curl -fsSL ${config_url}vimrc.winmanager)"
         write_config "${vimrc}" "${wm}"
-        
     fi
+        
 }
 
 init_man() {
