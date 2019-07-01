@@ -215,14 +215,12 @@ init_dev() {
         execute "rm conque_gdb.vmb"
     fi
 
-    # install vim YouCompleteMe
-    
-    if [ $(find $HOME/.vim -name 'YouCompleteMe' | wc -l) -eq 0 ]; then
-        execute "git clone https://github.com/Valloric/YouCompleteMe.git"
-        execute "cd YouCompleteMe && git submodule update --init --recursive"
-        execute "cd YouCompleteMe && python3 install.py --clang-completer"
+    #install vim plugin
+    if ! is_command "vim-addon-manager"; then
+        install_modules "vim-addon-manager"
+        install_modules "vim-youcompleteme"
+        execute "vim-addon-manager youcompleteme"
     fi
-    # execute "rm -rf YouCompleteMe"
 }
 
 init_man() {
