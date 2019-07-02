@@ -305,7 +305,7 @@ init_man() {
         "manpages-posix-dev"
     )
 
-    execute " apt-fast install -y " 1
+    execute " apt-fast install -y ${man_packets[*]} " 1
 }
 
 init_kde() {
