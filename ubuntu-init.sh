@@ -250,6 +250,8 @@ init_dev() {
         execute "wget ${config_url}conque_gdb.vmb"
         execute "vim conque_gdb.vmb -c \"so %\" -c \"q\""
         execute "rm conque_gdb.vmb"
+        write_config "${vimrc}" "nnoremap <F5> :ConqueGdbVSplit    "
+        write_config "${vimrc}" "nnoremap <F6> :ConqueTermSplit    "
     fi
 
     if [[ $( find ${vimdir} -name 'youcompleteme*' | wc -l ) -eq 0 ]];then
