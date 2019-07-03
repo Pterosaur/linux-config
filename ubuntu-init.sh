@@ -212,16 +212,6 @@ init_docker() {
 }
 
 init_dev() {
-
-    #execute "sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list"
-    #execute "sudo apt-fast update"
-
-    #local root="$HOME/root"
-    #local src="$root/src"
-    #local bin="$bin/bin"
-    #execute "mkdir -p ${root}"
-    #execute "mkdir -p ${src}"
-    #execute "mkdir -p ${bin}"
     
     # install develop tools
     dev_packages=(
@@ -250,8 +240,8 @@ init_dev() {
         execute "wget ${config_url}conque_gdb.vmb"
         execute "vim conque_gdb.vmb -c \"so %\" -c \"q\""
         execute "rm conque_gdb.vmb"
-        write_config "${vimrc}" "nnoremap <F5> :ConqueGdbVSplit    "
-        write_config "${vimrc}" "nnoremap <F6> :ConqueTermSplit    "
+        local conquegdb="$(curl -fsSL ${config_url}vimrc.conquegdb)"
+        write_config "${vimrc}" "${conquegdb}"
     fi
 
     if [[ $( find ${vimdir} -name 'youcompleteme*' | wc -l ) -eq 0 ]];then
@@ -292,6 +282,8 @@ init_dev() {
 
     if [[ $( find ${vimdir} -name 'minibufexpl.vim' | wc -l ) -eq 0 ]];then
         execute "wget https://raw.githubusercontent.com/fholgado/minibufexpl.vim/master/plugin/minibufexpl.vim -O ${vimdir}/plugin/minibufexpl.vim "
+        local minibufexpl="$(curl -fsSL ${config_url}vimrc.minibufexpl)"
+        write_config "${vimrc}" "${minibufexpl}"
     fi
 }
 

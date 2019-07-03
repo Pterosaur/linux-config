@@ -1,0 +1,5 @@
+
+nnoremap <F5> :ConqueGdbVSplit    
+nnoremap <C-F5> :ConqueGdbSplit    
+nnoremap <F6> :ConqueTermVSplit
+nnoremap <C-F6> :ConqueTermSplit    
