@@ -236,7 +236,7 @@ init_dev() {
     #install ConqueGDB
     if [[ $(find ${vimdir} -name 'conque_gdb.vim' | wc -l) -eq 0 ]]; then
         execute "wget ${config_url}conque_gdb.vmb"
-        execute "vim conque_gdb.vmb -c \"so %\" -c \"q\""
+        # execute "vim conque_gdb.vmb -c \"so %\" -c \"q\""
         execute "rm conque_gdb.vmb"
         local conquegdb="$(curl -fsSL ${config_url}vimrc.conquegdb)"
         write_config "${vimrc}" "${conquegdb}"
