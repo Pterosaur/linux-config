@@ -225,7 +225,6 @@ init_dev() {
         "gdb"
         "vim-scripts"
         "vim-doc"
-        "clang"
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
 
