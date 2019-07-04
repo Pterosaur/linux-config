@@ -233,11 +233,15 @@ init_dev() {
     local vimrc="${HOME}/.vimrc"
     install_command "vim-addon-manager" "vim-addon-manager"
 
+    if [[ $( find ${vimdir} -name 'pathogen.vim' | wc -l ) -eq 0 ]];then
+        # pathogen
+        execute "mkdir -p ${vimdir}autoload ${vimdir}/bundle && curl -LSso ${vimdir}/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
+        write_config "${vimrc}" "execute pathogen#infect()" 
+    fi
+
     #install ConqueGDB
     if [[ $(find ${vimdir} -name 'conque_gdb.vim' | wc -l) -eq 0 ]]; then
-        execute "wget ${config_url}conque_gdb.vmb"
-        # execute "vim conque_gdb.vmb -c \"so %\" -c \"q\""
-        execute "rm conque_gdb.vmb"
+        execute "git clone https://github.com/vim-scripts/Conque-GDB.git ${vimdir}/bundle/Conque-GDB"
         local conquegdb="$(curl -fsSL ${config_url}vimrc.conquegdb)"
         write_config "${vimrc}" "${conquegdb}"
     fi
@@ -248,12 +252,6 @@ init_dev() {
         execute "vim-addon-manager install youcompleteme"
         local ycm="$(curl -fsSL ${config_url}vimrc.youcompleteme)"
         write_config "${vimrc}" "${ycm}" 
-    fi
-
-    if [[ $( find ${vimdir} -name 'pathogen.vim' | wc -l ) -eq 0 ]];then
-        # pathogen
-        execute "mkdir -p ${vimdir}autoload ${vimdir}/bundle && curl -LSso ${vimdir}/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
-        write_config "${vimrc}" "execute pathogen#infect()" 
     fi
 
     if [[ $( find ${vimdir} -name 'nerdtree*' | wc -l ) -eq 0 ]];then
