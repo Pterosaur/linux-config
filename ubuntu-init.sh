@@ -365,7 +365,7 @@ main() {
 
     # automatical : vim git zsh samba tmux tools
     # manuual : dev kde xrdp
-    local install_modules=(git zsh tmux vim tools man)
+    local install_modules=(git zsh tmux vim tools)
 
     if [ $# -gt 0 ]; then
         install_modules=($@)
