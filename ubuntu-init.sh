@@ -225,10 +225,9 @@ init_dev() {
         "gdb"
         "vim-scripts"
         "vim-doc"
-        "ctags"
+        "clang"
     )
     execute "apt-fast install -y ${dev_packages[*]}" 1
-    
 
     #install vim plugin
     local vimdir="${HOME}/.vim"
@@ -246,7 +245,7 @@ init_dev() {
 
     if [[ $( find ${vimdir} -name 'youcompleteme*' | wc -l ) -eq 0 ]];then
         # YouCompleteMe
-        execute "apt-fast install -y vim-youcompleteme"
+        execute "apt-fast install -y vim-youcompleteme" 1
         execute "vim-addon-manager install youcompleteme"
         local ycm="$(curl -fsSL ${config_url}vimrc.youcompleteme)"
         write_config "${vimrc}" "${ycm}" 
@@ -267,6 +266,7 @@ init_dev() {
 
     if [[ $( find ${vimdir} -name 'taglist*' | wc -l ) -eq 0 ]];then
         # tag list
+        execute "apt-fast install -y ctags" 1
         execute "vim-addon-manager install taglist"
     fi
 
@@ -284,6 +284,21 @@ init_dev() {
         execute "wget https://raw.githubusercontent.com/fholgado/minibufexpl.vim/master/plugin/minibufexpl.vim -O ${vimdir}/plugin/minibufexpl.vim "
         local minibufexpl="$(curl -fsSL ${config_url}vimrc.minibufexpl)"
         write_config "${vimrc}" "${minibufexpl}"
+    fi
+
+    if [[ $( find ${vimdir} -name 'ycm-generator.vim' | wc -l ) -eq 0 ]]; then
+        execute "apt-fast install -y clang" 1
+        execute "git clone https://github.com/rdnetto/YCM-Generator.git ${vimdir}/bundle/YCM-Generator"
+    fi
+
+    if [[ $( find ${vimdir} -name 'color_coded.vim' | wc -l ) -eq 0 ]]; then
+        if ! [[ $(vim --version) =~ (lua5.([0-9]+)) ]]; then
+            echo "Miss vim that support Lua"
+            exit 1
+        fi
+        execute "apt-fast install -y build-essential libclang-3.9-dev libncurses-dev libz-dev cmake xz-utils libpthread-workqueue-dev lib${BASH_REMATCH[1]}-dev ${BASH_REMATCH[1]} " 1
+        execute "git clone https://github.com/jeaye/color_coded.git ${vimdir}/bundle/color_coded"
+        execute "cd ${vimdir}/bundle/color_coded && mkdir -p build && cd build && cmake .. && make -j && sudo make install && make clean && make clean_clang"
     fi
 }
 
