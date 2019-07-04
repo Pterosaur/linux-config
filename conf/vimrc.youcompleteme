@@ -1,4 +1,7 @@
-nnoremap <leader>gg :YcmCompleter GoTo<CR>
-nnoremap <leader>gi :YcmCompleter GoToInclude<CR>
-nnoremap <leader>gf :YcmCompleter GoToDefinition<CR>
-nnoremap <leader>gl :YcmCompleter GoToDeclaration<CR>
+
+nnoremap <F2> :YcmCompleter GoTo<CR>
+nnoremap <F3> :YcmCompleter GoToDefinition<CR>
+nnoremap <C-F3> :YcmCompleter GoToDeclaration<CR>
+nnoremap <C-F2> :YcmCompleter GoToInclude<CR>
+
+let g:ycm_confirm_extra_conf = 0
