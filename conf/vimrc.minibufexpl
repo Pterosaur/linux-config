@@ -1,3 +1,4 @@
 
 nnoremap <C-n> :bn<CR>
-nnoremap <C-p> :bp<CR>
+nnoremap <C-N> :bp<CR>
+
