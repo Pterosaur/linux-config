@@ -153,7 +153,7 @@ init_samba() {
     if [[ $(cat ${smbconf}) == *"${init_conf_flag}"* ]]; then
         return
     fi
-    write_config "${smbconf}" "# ${init_conf_flag}"
+    write_config "${smbconf}" "# ${init_conf_flag}" 0 1
     write_config "${smbconf}" "${content}" 0 1
     execute "printf \"${passwd}\n${passwd}\" | sudo smbpasswd -a ${user} -s"
     execute "service smbd restart" 1
