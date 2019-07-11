@@ -11,3 +11,4 @@ set autoindent
 set smartindent
 set cindent
 
+autocmd FileType make setlocal noexpandtab
