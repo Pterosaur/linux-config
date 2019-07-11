@@ -11,4 +11,9 @@ set autoindent
 set smartindent
 set cindent
 
+" For Makefile tab
 autocmd FileType make setlocal noexpandtab
+
+" For C++ public/private/protected indent
+set cindent
+set cinoptions=g-1
