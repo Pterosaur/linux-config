@@ -177,10 +177,10 @@ init_tmux() {
     local bash_aliases="$HOME/.bash_aliases"
     if [[ $(cat ${bash_aliases}) != *tmux* ]];then
         write_config "${bash_aliases}" "alias tmux='tmux -2'"
-        write_config "${bash_aliases}" "alias tn='tmux -2 new-session'"
+        write_config "${bash_aliases}" "alias tn='tmux -2 new-session -s'"
         write_config "${bash_aliases}" "alias tnw='tmux -2 new-window'"
         write_config "${bash_aliases}" "alias tl='tmux -2 list-session'"
-        write_config "${bash_aliases}" "alias ta='tmux -2 attach'"
+        write_config "${bash_aliases}" "alias ta='tmux -2 attach -t'"
     fi
 }
 
