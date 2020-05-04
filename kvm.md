@@ -25,5 +25,6 @@ sudo virt-install \
 
 ## [How to clone existing KVM virtual machine images on Linux](https://www.cyberciti.biz/faq/how-to-clone-existing-kvm-virtual-machine-images-on-linux/)
 
-## [KVM libvirt assign static guest IP addresses using DHCP on the virtual machine](https://www.cyberciti.biz/faq/linux-kvm-libvirt-dnsmasq-dhcp-static-ip-address-configuration-for-guest-os/)
+## [Static IP addresses in a KVM network](https://tqdev.com/2020-kvm-network-static-ip-addresses)
+#### [KVM libvirt assign static guest IP addresses using DHCP on the virtual machine](https://www.cyberciti.biz/faq/linux-kvm-libvirt-dnsmasq-dhcp-static-ip-address-configuration-for-guest-os/)
 
