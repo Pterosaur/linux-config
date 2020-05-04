@@ -13,7 +13,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/Pterosaur/linux-config/m
 
 ## Detail
 
-## vim
+### vim
 ```
 sudo apt install vim
 
@@ -27,13 +27,13 @@ set expandtab
 
 ```
 
-## git
+### git
 ```
 #set git editor as vim
 git config --global core.editor "vim"
 ```
 
-## ssh 
+### ssh 
 ```
 # public-privite key authentication
 
@@ -44,7 +44,7 @@ AuthorizedKeysFile %h/.ssh/authorized_keys
 
 ```
 
-## zsh (advanced bash)
+### zsh (advanced bash)
 ```
 #install zsh
 sudo apt install zsh
@@ -78,7 +78,7 @@ source ~/.oh-my-zsh/plugins/incr/incr*.zsh
 
 ```
 
-# samba (file shared with windows)
+### samba (file shared with windows)
 ```
 #install samba
 sudo apt install samba
@@ -102,7 +102,7 @@ smbpasswd -a user
 sudo service smbd restart
 ```
 
-## tmux(multiple screen)
+### tmux(multiple screen)
 ```
 #vi mode in tmux
 vim ~/.tmux.conf
@@ -143,4 +143,7 @@ set -g @plugin 'tmux-plugins/tmux-yank'
 run '~/.tmux/plugins/tpm/tpm'
 
 ```
+
+## linux-config
+- [Change Hostname](https://linuxize.com/post/how-to-change-hostname-on-ubuntu-18-04/)
 
