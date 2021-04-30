@@ -13,11 +13,17 @@ execute() {
     # 1: command
     # 2: run as root > 0, else as current user
     local prefix=""
-    if [[ $# -gt 1 && $2 -gt 0 ]]; then
-        prefix="sudo"
+    if [[ $# -gt 1 && $2 -gt 0 ]]
+    then
+        # If the user is root
+        if [[ $EUID -ne 0 ]]
+        then
+            prefix="sudo"
+        fi
     fi    
 
-    if [[ $- == *i* ]];then
+    if [[ $- == *i* ]]
+    then
         tput sgr0
     fi
 
@@ -27,20 +33,40 @@ execute() {
 is_command() {
     # args
     # 1: command name
-    if command -v $1 > /dev/null 2>&1; then
-        return 0
+    if command -v $1 > /dev/null 2>&1
+    then
+        echo 1
     else
-        return 1
+        echo 0
+    fi
+}
+
+installed_pkgs=$(apt -qq list 2>/dev/null | perl -n -e '/([^\/]+)\/.*\[installed\]/ && print " $1 "')
+
+is_installed() {
+    # args
+    # 1: pakcage name
+    if [[ ${installed_pkgs} =~ (^|[[:space:]])${1}($|[[:space:]]) ]]
+    then
+        echo 1
+    else
+        installed_pkgs=$(apt -qq list 2>/dev/null | perl -n -e '/([^\/]+)\/.*\[installed\]/ && print " $1 "')
+        if [[ ${installed_pkgs} =~ (^|[[:space:]])${1}($|[[:space:]]) ]]
+        then
+            echo 1
+        else
+            echo 0
+        fi
     fi
 }
 
 install_command() {
     # args
-    # 1: command name
-    # 2: package name
-    if ! is_command "apt-fast"; then
+    # 1: package name
+    if [[ $(is_command "apt-fast") == 0 ]]
+    then
         execute "apt-get update" 1
-        execute "printf \"6\n70\n\" | sudo apt-get install -y expect"
+        execute "printf \"6\n70\n\" | apt-get install -y expect" 1
         execute "apt-get install -y software-properties-common" 1
         execute "add-apt-repository main" 1
         execute "add-apt-repository universe" 1
@@ -48,10 +74,11 @@ install_command() {
         execute "add-apt-repository multiverse" 1
         execute "add-apt-repository -y ppa:apt-fast/stable" 1
         execute "apt-get update" 1
-        execute "printf \"1\n$(grep -c ^processor /proc/cpuinfo)\nyes\n\" | sudo apt-get -y install apt-fast "
+        execute "printf \"1\n$(grep -c ^processor /proc/cpuinfo)\nyes\n\" | apt-get -y install apt-fast " 1
     fi
-    if ! is_command ${1}; then
-        execute "apt-fast install -y ${@:2}" 1
+    if [[ $(is_installed ${1}) == 0 ]]
+    then
+        execute "apt-fast install -y ${@}" 1
     fi
 }
 
@@ -61,19 +88,22 @@ write_config() {
     # 2: content
     # 3: action == 1 overwirte, else append
     # 4: need_sudo == 1 sudo, else no
-    install_command "base64" "base64"
+
     local file=$1
     local content=$( base64 <<< "${2}" )
     local action=">>"
-    if [ ! -e $file ]; then
+    if [ ! -e $file ]
+    then
         touch $file
     fi
 
-    if [[ $# -gt 2 && $3 -eq 1 ]]; then
+    if [[ $# -gt 2 && $3 -eq 1 ]]
+    then
         action=">"
     fi
     local need_sudo=0
-    if [[ $# -gt 3 && $4 -eq 1 ]]; then
+    if [[ $# -gt 3 && $4 -eq 1 ]]
+    then
         need_sudo=1
     fi
 
@@ -84,19 +114,21 @@ write_config() {
 init_vim() {
 
     # install vim
-    install_command "vim" "vim"
+    install_command "vim"
 
     # configure vimrc
     local vimrc="${HOME}/.vimrc"
     local content="$(curl -fsSL ${config_url}vimrc)"
 
-    if [[ -e ${vimrc} && $(cat ${vimrc}) == *"${init_conf_flag}"* ]]; then
+    if [[ -e ${vimrc} && $(cat ${vimrc}) == *"${init_conf_flag}"* ]]
+    then
         return
     fi
     write_config "${vimrc}" "\" ${init_conf_flag}"
     write_config "${vimrc}" "${content}"
 
-    if [[ $( find ${vimdir} -name 'pathogen*' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'pathogen*' | wc -l ) -eq 0 ]]
+    then
         # pathogen
         execute "mkdir -p ~/.vim/autoload ~/.vim/bundle && curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
         write_config "${vimrc}" "execute pathogen#infect()" 
@@ -113,22 +145,24 @@ init_vim() {
 
 init_git() {
     # install git
-    install_command "git" "git"
+    install_command "git"
 
     execute "git config --global core.editor \"vim\""
 }
 
 init_zsh() {
     # install git
-    install_command "zsh" "zsh"
+    install_command "zsh"
 
-    if [[ ! -e "${HOME}/.oh-my-zsh" ]]; then
+    if [[ ! -e "${HOME}/.oh-my-zsh" ]]
+    then
         execute 'print "exit\n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
     fi
-    execute "chsh -s `which zsh`"
+    execute "chsh -s `which zsh` `whoami`" 1
 
     local zshrc="${HOME}/.zshrc"
-    if [[ -e ${zshrc} && $(cat ${zshrc}) == *"${init_conf_flag}"* ]]; then
+    if [[ -e ${zshrc} && $(cat ${zshrc}) == *"${init_conf_flag}"* ]]
+    then
         return
     fi
     write_config "${zshrc}" "# ${init_conf_flag}"
@@ -141,8 +175,8 @@ init_zsh() {
 
 init_samba() {
     # include samba
-    install_command "samba" "samba"
-    install_command "smbclient" "smbclient"
+    install_command "samba"
+    install_command "smbclient"
 
     # configure samba 
     local smbconf="/etc/samba/smb.conf"
@@ -150,7 +184,8 @@ init_samba() {
     local passwd="000000"
     local content="$(curl -fsSL ${config_url}smb.conf)"
 
-    if [[ $(cat ${smbconf}) == *"${init_conf_flag}"* ]]; then
+    if [[ $(cat ${smbconf}) == *"${init_conf_flag}"* ]]
+    then
         return
     fi
     write_config "${smbconf}" "# ${init_conf_flag}" 0 1
@@ -162,20 +197,22 @@ init_samba() {
 
 init_tmux() {
     # include tmux
-    install_command "tmux" "tmux"
+    install_command "tmux"
     
     # configure tmux
     local tmuxconf="$HOME/.tmux.conf"
     local content="$(curl -fsSL ${config_url}tmux.conf)"
     
-    if [[ $(cat ${tmuxconf}) != *"${init_conf_flag}"* ]]; then
+    if [[ $(cat ${tmuxconf}) != *"${init_conf_flag}"* ]]
+    then
         write_config "${tmuxconf}" "# ${init_conf_flag}"
         write_config "${tmuxconf}" "${content}"
         write_config "${tmuxconf}" "# ${init_conf_flag}"
     fi
     
     local bash_aliases="$HOME/.bash_aliases"
-    if [[ $(cat ${bash_aliases}) != *tmux* ]];then
+    if [[ $(cat ${bash_aliases}) != *tmux* ]]
+    then
         write_config "${bash_aliases}" "alias tmux='tmux -2'"
         write_config "${bash_aliases}" "alias tn='tmux -2 new-session -s'"
         write_config "${bash_aliases}" "alias tnw='tmux -2 new-window'"
@@ -186,28 +223,36 @@ init_tmux() {
 
 init_tools() {
 
-    if ! is_command "rg"; then
-        execute "curl -LO https://github.com/BurntSushi/ripgrep/releases/download/0.10.0/ripgrep_0.10.0_amd64.deb"
-        execute "dpkg -i ripgrep_0.10.0_amd64.deb" 1
-        execute "rm ripgrep_0.10.0_amd64.deb"
+    install_command "htop"
+
+    install_command "tree"
+
+    install_command "telnet"
+
+    install_command "wget"
+
+    install_command "net-tools" 
+
+    init_man
+
+    init_docker
+
+    if [[ $(is_command "rg") == 0 ]]
+    then
+        execute "wget https://github.com/BurntSushi/ripgrep/releases/download/12.1.1/ripgrep_12.1.1_amd64.deb -O /tmp/ripgrep.deb"
+        execute "dpkg -i /tmp/ripgrep.deb" 1
     fi
-
-    install_command "htop" "htop"
-
-    install_command "tree" "tree"
-
-    install_command "telnet" "telnet"
-
-    install_command "wget" "wget"
-
-    install_command "ip" "net-tools" 
-
 }
 
 init_docker() {
     #install docker
-    if ! is_command "docker"; then
-        execute 'sh -c "$(curl -fsSL get.docker.com)"'
+    if [[ $(is_command "docker") == 0 ]]
+    then
+        execute 'sh -c "$(curl -fsSL get.docker.com)"' 1
+    fi
+    if [[ $(id -u) != 0 ]]
+    then
+        execute 'usermod -aG docker $USER' 1
     fi
 }
 
@@ -218,6 +263,7 @@ init_dev() {
         "build-essential" 
         "python-dev" 
         "python3-dev"
+        "python3-pip"
         "cmake"
         "libtool"
         "m4"
@@ -231,22 +277,25 @@ init_dev() {
     #install vim plugin
     local vimdir="${HOME}/.vim"
     local vimrc="${HOME}/.vimrc"
-    install_command "vim-addon-manager" "vim-addon-manager"
+    install_command "vim-addon-manager"
 
-    if [[ $( find ${vimdir} -name 'pathogen.vim' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'pathogen.vim' | wc -l ) -eq 0 ]]
+    then
         # pathogen
         execute "mkdir -p ${vimdir}autoload ${vimdir}/bundle && curl -LSso ${vimdir}/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
         write_config "${vimrc}" "execute pathogen#infect()" 
     fi
 
     #install ConqueGDB
-    if [[ $(find ${vimdir} -name 'conque_gdb.vim' | wc -l) -eq 0 ]]; then
+    if [[ $(find ${vimdir} -name 'conque_gdb.vim' | wc -l) -eq 0 ]]
+    then
         execute "git clone https://github.com/vim-scripts/Conque-GDB.git ${vimdir}/bundle/Conque-GDB"
         local conquegdb="$(curl -fsSL ${config_url}vimrc.conquegdb)"
         write_config "${vimrc}" "${conquegdb}"
     fi
 
-    if [[ $( find ${vimdir} -name 'youcompleteme*' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'youcompleteme*' | wc -l ) -eq 0 ]]
+    then
         # YouCompleteMe
         execute "apt-fast install -y vim-youcompleteme" 1
         execute "vim-addon-manager install youcompleteme"
@@ -254,20 +303,23 @@ init_dev() {
         write_config "${vimrc}" "${ycm}" 
     fi
 
-    if [[ $( find ${vimdir} -name 'nerdtree*' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'nerdtree*' | wc -l ) -eq 0 ]]
+    then
         # NerdTree
         execute "git clone https://github.com/scrooloose/nerdtree.git ${vimdir}/bundle/nerdtree"
         local nt="$(curl -fsSL ${config_url}vimrc.nerdtree)"
         write_config "${vimrc}" "${nt}"
     fi
 
-    if [[ $( find ${vimdir} -name 'taglist*' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'taglist*' | wc -l ) -eq 0 ]]
+    then
         # tag list
         execute "apt-fast install -y ctags" 1
         execute "vim-addon-manager install taglist"
     fi
 
-    if [[ $( find ${vimdir} -name 'winmanager.vim' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'winmanager.vim' | wc -l ) -eq 0 ]]
+    then
         # WinManager
         execute "vim-addon-manager install winmanager"
         local wm_vim="${vimdir}/plugin/winmanager.vim"
@@ -277,23 +329,27 @@ init_dev() {
         write_config "${vimrc}" "${wm}"
     fi
 
-    if [[ $( find ${vimdir} -name 'minibufexpl.vim' | wc -l ) -eq 0 ]];then
+    if [[ $( find ${vimdir} -name 'minibufexpl.vim' | wc -l ) -eq 0 ]]
+    then
         execute "wget https://raw.githubusercontent.com/fholgado/minibufexpl.vim/master/plugin/minibufexpl.vim -O ${vimdir}/plugin/minibufexpl.vim "
         local minibufexpl="$(curl -fsSL ${config_url}vimrc.minibufexpl)"
         write_config "${vimrc}" "${minibufexpl}"
     fi
 
-    if [[ $( find ${vimdir} -name 'ycm-generator.vim' | wc -l ) -eq 0 ]]; then
+    if [[ $( find ${vimdir} -name 'ycm-generator.vim' | wc -l ) -eq 0 ]]
+    then
         execute "apt-fast install -y clang" 1
         execute "git clone https://github.com/rdnetto/YCM-Generator.git ${vimdir}/bundle/YCM-Generator"
     fi
 
-    if [[ $( find ${vimdir} -name 'color_coded.vim' | wc -l ) -eq 0 ]]; then
-        if ! [[ $(vim --version) =~ (lua5.([0-9]+)) ]]; then
+    if [[ $( find ${vimdir} -name 'color_coded.vim' | wc -l ) -eq 0 ]]
+    then
+        if ! [[ $(vim --version) =~ (lua5.([0-9]+)) ]]
+        then
             echo "Miss vim that support Lua"
             exit 1
         fi
-        execute "apt-fast install -y build-essential libclang-3.9-dev libncurses-dev libz-dev cmake xz-utils libpthread-workqueue-dev lib${BASH_REMATCH[1]}-dev ${BASH_REMATCH[1]} " 1
+        execute "apt-fast install -y build-essential libtinfo5 libclang-dev libncurses-dev libz-dev cmake xz-utils libpthread-workqueue-dev lib${BASH_REMATCH[1]}-dev ${BASH_REMATCH[1]} " 1
         execute "git clone https://github.com/jeaye/color_coded.git ${vimdir}/bundle/color_coded"
         execute "cd ${vimdir}/bundle/color_coded && mkdir -p build && cd build && cmake .. && make -j && sudo make install && make clean && make clean_clang"
     fi
@@ -365,12 +421,14 @@ main() {
     # manuual : dev kde xrdp
     local install_modules=("git" "zsh" "tmux" "vim" "tools")
 
-    if [ $# -gt 0 ]; then
+    if [ $# -gt 0 ]
+    then
         install_modules=($@)
     fi
     echo 'Install "'${install_modules[*]}'"'
 
-    install_command "curl" "curl"
+    install_command "sudo"
+    install_command "curl"
 
     for module in ${install_modules[@]};
     do
@@ -379,5 +437,3 @@ main() {
 }
 
 main ${@}
-
-
