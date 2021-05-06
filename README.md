@@ -3,7 +3,7 @@
 Automatically Install
 ``` bash
 # Install docker image
-sh -c "$(curl -fsSL get.docker.com)
+sh -c "$(curl -fsSL get.docker.com)"
 docker build -t zegan https://raw.githubusercontent.com/Pterosaur/linux-config/master/Dockerfile
 ```
 ``` bash
