@@ -222,16 +222,16 @@ init_tmux() {
 }
 
 init_tools() {
-
-    install_command "htop"
-
-    install_command "tree"
-
-    install_command "telnet"
-
-    install_command "wget"
-
-    install_command "net-tools" 
+    tools_packages=(
+        "htop" 
+        "tree" 
+        "telnet"
+        "net-tools"
+        "iputils-ping"
+        "iproute2"
+        "iproute2-doc"
+    )
+    execute "apt-fast install -y ${dev_packages[*]}" 1
 
     init_man
 
@@ -429,6 +429,7 @@ main() {
 
     install_command "sudo"
     install_command "curl"
+    install_command "wget"
 
     for module in ${install_modules[@]};
     do
