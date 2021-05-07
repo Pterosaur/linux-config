@@ -13,7 +13,7 @@ RUN \
    fi
 
 # Install environment
-COPY ubuntu-init.sh .ubuntu-init
+ADD ubuntu-init.sh .ubuntu-init
 
 RUN \
    bash .ubuntu-init; \
