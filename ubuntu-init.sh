@@ -231,7 +231,7 @@ init_tools() {
         "iproute2"
         "iproute2-doc"
     )
-    execute "apt-fast install -y ${dev_packages[*]}" 1
+    execute "apt-fast install -y ${tools_packages[*]}" 1
 
     init_man
 
