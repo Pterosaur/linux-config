@@ -60,7 +60,7 @@ is_installed() {
     fi
 }
 
-install_command() {
+install_modules() {
     # args
     # 1: package name
     if [[ $(is_command "apt-fast") == 0 ]]
@@ -114,7 +114,7 @@ write_config() {
 init_vim() {
 
     # install vim
-    install_command "vim"
+    install_modules "vim"
 
     # configure vimrc
     local vimrc="${HOME}/.vimrc"
@@ -145,14 +145,14 @@ init_vim() {
 
 init_git() {
     # install git
-    install_command "git"
+    install_modules "git"
 
     execute "git config --global core.editor \"vim\""
 }
 
 init_zsh() {
     # install git
-    install_command "zsh"
+    install_modules "zsh"
 
     if [[ ! -e "${HOME}/.oh-my-zsh" ]]
     then
@@ -175,8 +175,8 @@ init_zsh() {
 
 init_samba() {
     # include samba
-    install_command "samba"
-    install_command "smbclient"
+    install_modules "samba"
+    install_modules "smbclient"
 
     # configure samba 
     local smbconf="/etc/samba/smb.conf"
@@ -197,7 +197,7 @@ init_samba() {
 
 init_tmux() {
     # include tmux
-    install_command "tmux"
+    install_modules "tmux"
     
     # configure tmux
     local tmuxconf="$HOME/.tmux.conf"
@@ -277,7 +277,7 @@ init_dev() {
     #install vim plugin
     local vimdir="${HOME}/.vim"
     local vimrc="${HOME}/.vimrc"
-    install_command "vim-addon-manager"
+    install_modules "vim-addon-manager"
 
     if [[ $( find ${vimdir} -name 'pathogen.vim' | wc -l ) -eq 0 ]]
     then
@@ -371,7 +371,7 @@ init_man() {
 }
 
 init_kde() {
-    install_command "expect"
+    install_modules "expect"
     execute "cat <<EOF | expect
 set timeout -1
 spawn apt install -y kubuntu-desktop
@@ -419,19 +419,19 @@ main() {
 
     # automatical : vim git zsh samba tmux tools
     # manuual : dev kde xrdp
-    local install_modules=("git" "zsh" "tmux" "vim" "tools")
+    local init_modules=("git" "zsh" "tmux" "vim" "tools")
 
     if [ $# -gt 0 ]
     then
-        install_modules=($@)
+        init_modules=($@)
     fi
-    echo 'Install "'${install_modules[*]}'"'
+    echo 'Install "'${init_modules[*]}'"'
 
-    install_command "sudo"
-    install_command "curl"
-    install_command "wget"
+    install_modules "sudo"
+    install_modules "curl"
+    install_modules "wget"
 
-    for module in ${install_modules[@]};
+    for module in ${init_modules[@]};
     do
         eval "init_"$module
     done
