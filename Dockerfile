@@ -2,7 +2,15 @@ ARG UBUNTU_VERSION=20.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 
-WORKDIR /root
+RUN apt-get update
+RUN apt-get install -y sudo
+RUN useradd -ms /bin/bash -G sudo zegan
+RUN usermod -aG root zegan
+RUN usermod -aG sudo zegan
+RUN echo "zegan ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+USER zegan
+ENV USER=zegan
+WORKDIR /home/zegan
 
 ARG IN_CHINA=false
 
@@ -13,12 +21,11 @@ RUN \
    fi
 
 # Install environment
-ADD ubuntu-init.sh .ubuntu-init
+ADD ubuntu-init.sh /usr/bin/ubuntu-init
 
 RUN \
-   bash .ubuntu-init; \
-   bash .ubuntu-init dev; \
-   rm .ubuntu-init
+   bash ubuntu-init; \
+   bash ubuntu-init dev;
 
 CMD \
    zsh

@@ -252,7 +252,7 @@ init_docker() {
     fi
     if [[ $(id -u) != 0 ]]
     then
-        execute 'usermod -aG docker $USER' 1
+        execute "usermod -aG docker $(whoami)" 1
     fi
 }
 
@@ -356,6 +356,9 @@ init_dev() {
 }
 
 init_man() {
+
+    execute "yes | unminimize" 1
+
     man_packets=(
         "man"
         "man-db"
@@ -368,6 +371,10 @@ init_man() {
     )
 
     execute " apt-fast install -y ${man_packets[*]} " 1
+}
+
+init_kvm() {
+    execute "apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker" 1
 }
 
 init_kde() {
