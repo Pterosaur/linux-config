@@ -357,7 +357,7 @@ init_dev() {
 
 init_man() {
 
-    execute "yes | unminimize" 1
+    execute "yes | unminimize || true" 1
 
     man_packets=(
         "man"
