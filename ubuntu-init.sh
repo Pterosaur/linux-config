@@ -41,7 +41,7 @@ is_command() {
     fi
 }
 
-installed_pkgs=$(apt -qq list 2>/dev/null | perl -n -e '/([^\/]+)\/.*\[installed\]/ && print " $1 "')
+installed_pkgs=$(apt-get -qq list 2>/dev/null | perl -n -e '/([^\/]+)\/.*\[installed\]/ && print " $1 "')
 
 is_installed() {
     # args
@@ -50,7 +50,7 @@ is_installed() {
     then
         echo 1
     else
-        installed_pkgs=$(apt -qq list 2>/dev/null | perl -n -e '/([^\/]+)\/.*\[installed\]/ && print " $1 "')
+        installed_pkgs=$(apt-get -qq list 2>/dev/null | perl -n -e '/([^\/]+)\/.*\[installed\]/ && print " $1 "')
         if [[ ${installed_pkgs} =~ (^|[[:space:]])${1}($|[[:space:]]) ]]
         then
             echo 1
@@ -230,6 +230,7 @@ init_tools() {
         "iputils-ping"
         "iproute2"
         "iproute2-doc"
+        "fzf"
     )
     execute "apt-fast install -y ${tools_packages[*]}" 1
 
@@ -381,7 +382,7 @@ init_kde() {
     install_modules "expect"
     execute "cat <<EOF | expect
 set timeout -1
-spawn apt install -y kubuntu-desktop
+spawn apt-get install -y kubuntu-desktop
 expect \"Default display manager: \"
 send \"sddm\n\"
 expect eof
@@ -389,7 +390,7 @@ EOF" 1
 }
 
 init_xrdp() {
-    execute "apt install -y xrdp" 1
+    execute "apt-get install -y xrdp" 1
     execute "sed -e 's/^new_cursors=true/new_cursors=false/g' \
            -i /etc/xrdp/xrdp.ini" 1
     execute "systemctl enable xrdp" 1

@@ -28,3 +28,43 @@ bindkey -s "^[Om" "-"
 bindkey -s "^[Oj" "*"
 bindkey -s "^[Oo" "/"
 
+
+alias ssh='ssh -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no '
+alias scp='scp -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no '
+
+autoload -Uz compinit && compinit
+
+_ssh_fuzzy() {
+    local cur pre cmd passwords_path
+    cur=${words[CURRENT]}
+    pre=${words[CURRENT-1]}
+    cmd=${words[1]}
+    passwords_path="${HOME}/.passwords.txt"
+
+    if [[ "${cur}" == *@ ]]; then
+        local prefix suffix
+        prefix="${cur%%@*}@"
+        suffix=""
+        if [[ " ${words} " == *" scp "* || ${cmd} == "scp" ]]; then
+            suffix=":~/"
+        fi
+        cur=${cur#*@}
+        hostname=$(cat /etc/hosts | grep -v "^#" | grep -v "^$" | awk '{print $2}' | fzf )
+        [[ -n ${hostname} ]] && compadd -P "$prefix" -- ${hostname}${suffix}
+    elif [[ "${cmd}" == "sshpass" && "${pre}" == "-p" && -f ${passwords_path} ]]; then
+        local password
+        password=$(cat ${passwords_path} | fzf )
+        [[ -n "${password}" ]] && compadd -S " " -- ${password}
+    else
+
+        if [[ " ${words} " == *" scp "* || ${cmd} == "scp" ]]; then
+            _ssh
+        else
+            _default
+        fi
+    fi
+}
+
+compdef _ssh_fuzzy ssh
+compdef _ssh_fuzzy scp
+compdef _ssh_fuzzy sshpass
