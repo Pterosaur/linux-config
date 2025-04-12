@@ -28,43 +28,57 @@ bindkey -s "^[Om" "-"
 bindkey -s "^[Oj" "*"
 bindkey -s "^[Oo" "/"
 
-
-alias ssh='ssh -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no '
-alias scp='scp -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no '
-
-autoload -Uz compinit && compinit
-
-_ssh_fuzzy() {
+_sshpass_completion() {
     local cur pre cmd passwords_path
     cur=${words[CURRENT]}
     pre=${words[CURRENT-1]}
     cmd=${words[1]}
     passwords_path="${HOME}/.passwords.txt"
-
-    if [[ "${cur}" == *@ ]]; then
-        local prefix suffix
-        prefix="${cur%%@*}@"
-        suffix=""
-        if [[ " ${words} " == *" scp "* || ${cmd} == "scp" ]]; then
-            suffix=":~/"
-        fi
-        cur=${cur#*@}
-        hostname=$(cat /etc/hosts | grep -v "^#" | grep -v "^$" | awk '{print $2}' | fzf )
-        [[ -n ${hostname} ]] && compadd -P "$prefix" -- ${hostname}${suffix}
-    elif [[ "${cmd}" == "sshpass" && "${pre}" == "-p" && -f ${passwords_path} ]]; then
-        local password
-        password=$(cat ${passwords_path} | fzf )
-        [[ -n "${password}" ]] && compadd -S " " -- ${password}
+    if [[ "${pre}" == "-p" && -f ${passwords_path} ]]; then
+        local passwords
+        passwords=($(cat ${passwords_path} ))
+        compadd -M 'm:{a-zA-Z}={A-Za-z} r:|.=* r:|=*' -a "$@" - passwords
+        return 0
     else
-
-        if [[ " ${words} " == *" scp "* || ${cmd} == "scp" ]]; then
-            _ssh
-        else
+        local service service_index
+        service_index=${words[(I)$~@(ssh|scp)]}
+        if [[ ${service_index} == 0 ]]; then
             _default
+            return
         fi
+        service=${words[service_index]}
+        (( service_index-- ))
+        CURRENT=$(( ${CURRENT} - ${service_index} ))
+        words=("${words[@]:$service_index}")
+        curcontext=":complete:${service}:"
+        _ssh
     fi
 }
 
-compdef _ssh_fuzzy ssh
-compdef _ssh_fuzzy scp
-compdef _ssh_fuzzy sshpass
+compdef _sshpass_completion sshpass
+
+_git_fuzzy() {
+    if [[ -n $COMPSTATE[insert] ]]; then return; fi
+    local cur prev cmd sub_cmd repo_list
+
+    cur=${words[CURRENT]}
+    prev=${words[CURRENT-1]}
+    cmd=${words[1]}
+    sub_cmd=${words[2]}
+    action=${words[3]}
+
+    if [[ "${cmd}" == "git" && ( "${sub_cmd}" == "clone" || ("${sub_cmd}" == "remote" && ${action} == "add" ) ) ]]; then
+        local repo_file="${HOME}/.git_repos"
+        local repo
+        if [[ -f "$repo_file" ]]; then
+            repo=$(cat "$repo_file" | fzf )
+        fi
+        compadd -Q -S '' -- "$repo"
+        return 0
+    else
+        _git
+    fi
+}
+
+compdef _git_fuzzy git
+

@@ -167,10 +167,12 @@ init_zsh() {
     fi
     write_config "${zshrc}" "# ${init_conf_flag}"
     execute "sed -i -E \"s/^ZSH_THEME=.*$/ZSH_THEME=\\\"ys\\\"/\" ${zshrc}"
-    execute "sed -i -E \"s/^plugins=\(/plugins=\( extract z sudo /\" ${zshrc}"
+    execute "sed -i -E \"s/^plugins=\(/plugins=\( extract z sudo fzf-tab zsh-completions /\" ${zshrc}"
     local content=$(curl -fsSL ${config_url}zshrc)
     write_config "${zshrc}" "${content}"
 
+    git clone https://github.com/Aloxaf/fzf-tab ${HOME}/.oh-my-zsh/custom/plugins/fzf-tab
+    git clone https://github.com/zsh-users/zsh-completions.git ${HOME}/.oh-my-zsh/custom/plugins/zsh-completions
 }
 
 init_samba() {
